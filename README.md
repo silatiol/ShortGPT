@@ -1,4 +1,5 @@
 # 🚀🎬 ShortGPT 
+## AI video automation framework
 <p align="center">
   <a href="https://discord.gg/uERx39ru3R">
     <img src="https://dcbadge.vercel.app/api/server/uERx39ru3R?compact=true&style=flat">
