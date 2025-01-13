@@ -4,16 +4,16 @@ from shortGPT.database.db_document import TinyMongoDocument
 from dotenv import load_dotenv
 load_dotenv('./.env')
 class ApiProvider(enum.Enum):
-    OPENAI = "OPENAI"
-    ELEVEN_LABS = "ELEVEN LABS"
-    PEXELS = "PEXELS"
+    OPENAI = "OPENAI_API_KEY"
+    ELEVEN_LABS = "ELEVENLABS_API_KEY"
+    PEXELS = "PEXELS_API_KEY"
 
 
 class ApiKeyManager:
     api_key_doc_manager = TinyMongoDocument("api_db", "api_keys", "key_doc", create=True)
 
     @classmethod
-    def get_api_key(cls, key: str or ApiProvider):
+    def get_api_key(cls, key: str | ApiProvider):
         if isinstance(key, ApiProvider):
             key = key.value
             
@@ -31,7 +31,7 @@ class ApiKeyManager:
         return ""
 
     @classmethod
-    def set_api_key(cls, key: str or ApiProvider, value: str):
+    def set_api_key(cls, key: str | ApiProvider, value: str):
         if isinstance(key, ApiProvider):
             key = key.value
         return cls.api_key_doc_manager._save({key: value})

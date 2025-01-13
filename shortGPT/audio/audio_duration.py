@@ -17,9 +17,9 @@ def get_duration_yt_dlp(url):
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             dictMeta = ydl.extract_info(url, download=False, )
-            return dictMeta['duration'], ""
+            return dictMeta['duration']
     except Exception as e:
-        return None, f"Failed getting duration from the following video/audio url/path using yt_dlp. {e.args[0]}"
+        raise Exception(f"Failed getting duration from the following video/audio url/path using yt_dlp. {url} {e.args[0]}")
 
 
 def get_duration_ffprobe(signed_url):
@@ -58,13 +58,11 @@ def get_asset_duration(url, isVideo=True):
     if duration is not None:
         return url, duration
 
-    duration, err_yt_dlp = get_duration_yt_dlp(url)
+    duration = get_duration_yt_dlp(url)
     if duration is not None:
         return url, duration
-    print(err_yt_dlp)
     print(err_ffprobe)
-    print(f"The url/path {url} does not point to a video/ audio. Impossible to extract its duration")
-    return url, None
+    raise Exception(f"The url/path {url} does not point to a video/ audio. Impossible to extract its duration")
 
 
 def getYoutubeAudioLink(url):

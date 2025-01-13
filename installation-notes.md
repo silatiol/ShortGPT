@@ -31,10 +31,9 @@ docker save short_gpt_docker > short_gpt_docker.tar
 ### Here are the steps to install it from scratch on Linux, Debian 11 x64:
 
 In short, you need to use:
-- Python 3.11.3
-- openai package 0.28.0, then upgrade openai-whisper
+- Python 3.10
+- openai package, then upgrade openai-whisper
 - ffmpeg 4.2.3
-- ImageMagick 7.1.1
 
 ### 1. OS: Debian 11 x64
 ```bash
@@ -42,22 +41,22 @@ sudo apt update && sudo apt upgrade
 sudo apt install wget git libltdl-dev libjpeg-dev libpng-dev libtiff-dev libgif-dev libfreetype6-dev liblcms2-dev libxml2-dev wget build-essential libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
 ```
 
-### 2. Install Python version: 3.11.3
+### 2. Install Python version: 3.10.3
 ```bash
-wget https://www.python.org/ftp/python/3.11.3/Python-3.11.3.tgz 
-tar xzf Python-3.11.3.tgz 
-cd Python-3.11.3 
+wget https://www.python.org/ftp/python/3.10.3/Python-3.10.3.tgz 
+tar xzf Python-3.10.3.tgz 
+cd Python-3.10.3 
 ./configure --enable-optimizations
 make install
 ```
 
 To check the Python version, use this command:
 ```bash
-python3.11 -V
+python3.10 -V
 ```
 To use pip, use this command:
 ```bash
-pip3.11 install <package-name>
+pip3.10 install <package-name>
 ```
 
 ### 3. Install ffmpeg version: 4.2.3
@@ -124,66 +123,7 @@ echo 'export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64/:/usr/local/lib/x86
 source ~/.bashrc
 ```
 
-### 4. Install ImageMagick 7.1.1:
-4.1. Clone ImageMagick:
+### 4. Upgrade openai-whisper:
 ```bash
-sudo git clone https://github.com/ImageMagick/ImageMagick.git
-```
-4.2. Go to the ImageMagick folder and run configuration:
-```bash
-cd ImageMagick
-./configure
-```
-4.3. Make:
-```bash
-sudo make
-```
-4.4. Install complied code:
-```bash
-sudo make install
-```
-4.5. Update path:
-```bash
-sudo ldconfig /usr/local/lib
-```
-4.6. (Optional) Check version
-```bash
-$ magick -version
-```
-4.7. Fix Imagemagick policy.xml bug on Linux using MoviePy
-```bash
-!sed -i '/<policy domain="path" rights="none" pattern="@\*"/d' /etc/ImageMagick-6/policy.xml
-```
-
-### 5. Upgrade openai-whisper:
-```bash
-pip3.11 install -U openai-whisper
-```
-
-### 6. (Optional) Install torch 2.1.0:
-```bash
-pip3.11 install torch==2.1.0
-```
-
-### 7. This is a list of Python lib and their versions, I'm using them without errors:
-```bash
-edge-tts==6.1.9
-ffmpeg==1.4
-ffmpeg-python==0.2.0
-gradio==3.38.0==3.38.0
-moviepy==1.0.3==1.0.3
-openai==0.28.1==0.28.1
-pillow==9.0.0==9.0.0
-proglog==0.1.10
-progress==1.6
-protobuf==3.20.3==3.20.3
-python-dotenv==1.0.0
-questionary==2.0.1
-tiktoken==0.5.1
-tinydb==4.8.0
-tinymongo==0.2.0
-torch==2.1.0
-torchaudio==2.1.0
-whisper-timestamped==1.12.20
-yt-dlp==2023.10.13
+pip3.10 install -U openai-whisper
 ```

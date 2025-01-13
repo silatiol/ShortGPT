@@ -69,11 +69,12 @@ def open_file(filepath):
         return infile.read()
 
 
-def gpt3Turbo_completion(chat_prompt="", system="You are an AI that can give the answer to anything", temp=0.7, model="gpt-3.5-turbo", max_tokens=1000, remove_nl=True, conversation=None):
-    openai.api_key = ApiKeyManager.get_api_key("OPENAI")
+def llm_completion(chat_prompt="", system="", temp=0.7, model="gpt-4o-mini", max_tokens=2000, remove_nl=True, conversation=None):
+    openai.api_key = ApiKeyManager.get_api_key("OPENAI_API_KEY")
     max_retry = 5
     retry = 0
-    while True:
+    error = ""
+    for i in range(max_retry):
         try:
             if conversation:
                 messages = conversation
@@ -86,11 +87,13 @@ def gpt3Turbo_completion(chat_prompt="", system="You are an AI that can give the
                 model=model,
                 messages=messages,
                 max_tokens=max_tokens,
-                temperature=temp)
+                temperature=temp,
+                timeout=30
+                )
             text = response.choices[0].message.content.strip()
             if remove_nl:
                 text = re.sub('\s+', ' ', text)
-            filename = '%s_gpt3.txt' % time()
+            filename = '%s_llm_completion.txt' % time()
             if not os.path.exists('.logs/gpt_logs'):
                 os.makedirs('.logs/gpt_logs')
             with open('.logs/gpt_logs/%s' % filename, 'w', encoding='utf-8') as outfile:
@@ -98,7 +101,7 @@ def gpt3Turbo_completion(chat_prompt="", system="You are an AI that can give the
             return text
         except Exception as oops:
             retry += 1
-            if retry >= max_retry:
-                raise Exception("GPT3 error: %s" % oops)
             print('Error communicating with OpenAI:', oops)
+            error = str(oops)
             sleep(1)
+    raise Exception(f"Error communicating with LLM Endpoint Completion errored more than error: {error}")

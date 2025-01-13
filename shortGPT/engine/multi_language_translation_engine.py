@@ -100,11 +100,11 @@ class MultiLanguageTranslationEngine(AbstractContentEngine):
             t2+=-0.05
             editing_engine.addEditingStep(EditingStep.INSERT_AUDIO, {'url': audio_path, 'set_time_start': t1, 'set_time_end': t2})
             if t1-last_t2 >4:
-                editing_engine.addEditingStep(EditingStep.EXTRACT_AUDIO, {"url": video_audio, "subclip": {"t_start": last_t2, "t_end": t1}, "set_time_start": last_t2, "set_time_end":  t1})
+                editing_engine.addEditingStep(EditingStep.EXTRACT_AUDIO, {"url": video_audio, "subclip": {"start_time": last_t2, "end_time": t1}, "set_time_start": last_t2, "set_time_end":  t1})
             last_t2 = t2
 
         if video_length - last_t2 >4:
-            editing_engine.addEditingStep(EditingStep.EXTRACT_AUDIO, {"url": video_audio, "subclip": {"t_start": last_t2, "t_end": video_length}, "set_time_start": last_t2, "set_time_end":  video_length})
+            editing_engine.addEditingStep(EditingStep.EXTRACT_AUDIO, {"url": video_audio, "subclip": {"start_time": last_t2, "end_time": video_length}, "set_time_start": last_t2, "set_time_end":  video_length})
 
         if self._db_use_captions:
             is_landscape = get_aspect_ratio(input_video) > 1

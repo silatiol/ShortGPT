@@ -9,11 +9,9 @@ from gui.ui_abstract_component import AbstractComponentUI
 from gui.ui_components_html import GradioComponentsHTML
 from shortGPT.audio.edge_voice_module import EdgeTTSVoiceModule
 from shortGPT.audio.eleven_voice_module import ElevenLabsVoiceModule
-from shortGPT.audio.coqui_voice_module import CoquiVoiceModule
 from shortGPT.config.api_db import ApiKeyManager
 from shortGPT.config.languages import (EDGE_TTS_VOICENAME_MAPPING,
                                         ELEVEN_SUPPORTED_LANGUAGES,
-                                        COQUI_SUPPORTED_LANGUAGES,
                                         LANGUAGE_ACRONYM_MAPPING,
                                         Language)
 from shortGPT.engine.content_video_engine import ContentVideoEngine
@@ -50,11 +48,11 @@ class VideoAutomationUI(AbstractComponentUI):
         self.outHTML = None
 
     def is_key_missing(self):
-        openai_key = ApiKeyManager.get_api_key("OPENAI")
+        openai_key = ApiKeyManager.get_api_key("OPENAI_API_KEY")
         if not openai_key:
             return "Your OpenAI key is missing. Please go to the config tab and enter the API key."
 
-        pexels_api_key = ApiKeyManager.get_api_key("PEXELS")
+        pexels_api_key = ApiKeyManager.get_api_key("PEXELS_API_KEY")
         if not pexels_api_key:
             return "Your Pexels API key is missing. Please go to the config tab and enter the API key."
 
@@ -80,7 +78,7 @@ class VideoAutomationUI(AbstractComponentUI):
         return video_path
 
     def reset_components(self):
-        return gr.Chatbot.update(value=self.initialize_conversation()), gr.update(visible=True), gr.HTML.update(value="", visible=False), gr.HTML.update(value="", visible=False)
+        return gr.update(value=self.initialize_conversation()), gr.update(visible=True), gr.update(value="", visible=False), gr.update(value="", visible=False)
 
     def chatbot_conversation(self):
         def respond(message, chat_history, progress=gr.Progress()):
@@ -96,21 +94,18 @@ class VideoAutomationUI(AbstractComponentUI):
                 else:
                     self.isVertical = "vertical" in message.lower() or "short" in message.lower()
                     self.state = Chatstate.ASK_VOICE_MODULE
-                    bot_message = "Which voice module do you want to use? Please type 'ElevenLabs' for high quality, 'EdgeTTS' for free but medium quality voice or 'CoquiTTS' for free and good quality voice but requires a powerful GPU."
+                    bot_message = "Which voice module do you want to use? Please type 'ElevenLabs' for high quality, 'EdgeTTS' for free medium quality voice."
             elif self.state == Chatstate.ASK_VOICE_MODULE:
                 if "elevenlabs" in message.lower():
-                    eleven_labs_key = ApiKeyManager.get_api_key("ELEVEN LABS")
+                    eleven_labs_key = ApiKeyManager.get_api_key("ELEVENLABS_API_KEY")
                     if not eleven_labs_key:
-                        bot_message = "Your Eleven Labs API key is missing. Please go to the config tab and enter the API key."
+                        bot_message = "Your ELEVENLABS_API_KEY API key is missing. Please go to the config tab and enter the API key."
                         return
                     self.voice_module = ElevenLabsVoiceModule
                     language_choices = [lang.value for lang in ELEVEN_SUPPORTED_LANGUAGES]
                 elif "edgetts" in message.lower():
                     self.voice_module = EdgeTTSVoiceModule
                     language_choices = [lang.value for lang in Language]
-                elif "coquitts" in message.lower():
-                    self.voice_module = CoquiVoiceModule
-                    language_choices = [lang.value for lang in COQUI_SUPPORTED_LANGUAGES]
                 else:
                     bot_message = "Invalid voice module. Please type 'ElevenLabs' or 'EdgeTTS'."
                     return
@@ -120,11 +115,9 @@ class VideoAutomationUI(AbstractComponentUI):
                 self.language = next((lang for lang in Language if lang.value.lower() in message.lower()), None)
                 self.language = self.language if self.language else Language.ENGLISH
                 if self.voice_module == ElevenLabsVoiceModule:
-                    self.voice_module = ElevenLabsVoiceModule(ApiKeyManager.get_api_key('ELEVEN LABS'), "Antoni", checkElevenCredits=True)
+                    self.voice_module = ElevenLabsVoiceModule(ApiKeyManager.get_api_key('ELEVENLABS_API_KEY'), "Chris", checkElevenCredits=True)
                 elif self.voice_module == EdgeTTSVoiceModule:
                     self.voice_module = EdgeTTSVoiceModule(EDGE_TTS_VOICENAME_MAPPING[self.language]['male'])
-                elif self.voice_module == CoquiVoiceModule:
-                    self.voice_module = CoquiVoiceModule("Ana Florence", LANGUAGE_ACRONYM_MAPPING[self.language])
                 self.state = Chatstate.ASK_DESCRIPTION
                 bot_message = "Amazing 🔥 ! 📝Can you describe thoroughly the subject of your video?📝 I will next generate you a script based on that description"
             elif self.state == Chatstate.ASK_DESCRIPTION:
@@ -135,12 +128,12 @@ class VideoAutomationUI(AbstractComponentUI):
                 if "yes" in message.lower():
                     self.state = Chatstate.MAKE_VIDEO
                     inputVisible = False
-                    yield gr.update(visible=False), gr.Chatbot.update(value=[[None, "Your video is being made now! 🎬"]]), gr.HTML.update(value="", visible=False), gr.HTML.update(value=error_html, visible=errorVisible), gr.update(visible=folderVisible), gr.update(visible=False)
+                    yield gr.update(visible=False), gr.update(value=[[None, "Your video is being made now! 🎬"]]), gr.update(value="", visible=False), gr.update(value=error_html, visible=errorVisible), gr.update(visible=folderVisible), gr.update(visible=False)
                     try:
                         video_path = self.make_video(self.script, self.voice_module, self.isVertical, progress=progress)
                         file_name = video_path.split("/")[-1].split("\\")[-1]
                         current_url = self.shortGptUI.share_url+"/" if self.shortGptUI.share else self.shortGptUI.local_url
-                        file_url_path = f"{current_url}file={video_path}"
+                        file_url_path = f"{current_url}gradio_api/file={video_path}"
                         self.video_html = f'''
                             <div style="display: flex; flex-direction: column; align-items: center;">
                                 <video width="{600}" height="{300}" style="max-height: 100%;" controls>
@@ -162,8 +155,7 @@ class VideoAutomationUI(AbstractComponentUI):
                         error_html = gradio_content_automation_ui_error_template.format(error_message=error_name, stack_trace=traceback_str)
                         bot_message = "We encountered an error while making this video ❌"
                         print("Error", traceback_str)
-                        yield gr.update(visible=False), gr.Chatbot.update(value=[[None, "Your video is being made now! 🎬"]]), gr.HTML.update(value="", visible=False),
-                        gr.HTML.update(value=error_html, visible=errorVisible), gr.update(visible=folderVisible), gr.update(visible=True)
+                        yield gr.update(visible=False), gr.update(value=[[None, "Your video is being made now! 🎬"]]), gr.update(value="", visible=False), gr.update(value=error_html, visible=errorVisible), gr.update(visible=folderVisible), gr.update(visible=True)
 
                 else:
                     self.state = Chatstate.ASK_CORRECTION  # change self.state to ASK_CORRECTION
@@ -173,7 +165,7 @@ class VideoAutomationUI(AbstractComponentUI):
                 self.state = Chatstate.ASK_SATISFACTION
                 bot_message = f"📝 Here is your corrected script: \n\n--------------\n{self.script}\n\n・Are you satisfied with the script and ready to proceed with creating the video? Please respond with 'YES' or 'NO'. 👍👎"
             chat_history.append((message, bot_message))
-            yield gr.update(value="", visible=inputVisible), gr.Chatbot.update(value=chat_history), gr.HTML.update(value=self.video_html, visible=self.videoVisible), gr.HTML.update(value=error_html, visible=errorVisible), gr.update(visible=folderVisible), gr.update(visible=True)
+            yield gr.update(value="", visible=inputVisible), gr.update(value=chat_history), gr.update(value=self.video_html, visible=self.videoVisible), gr.update(value=error_html, visible=errorVisible), gr.update(visible=folderVisible), gr.update(visible=True)
 
         return respond
 
@@ -205,7 +197,7 @@ class VideoAutomationUI(AbstractComponentUI):
                 respond = self.chatbot_conversation()
 
             self.errorHTML = gr.HTML(visible=False)
-            self.outHTML = gr.HTML(visible=False)
+            self.outHTML = gr.HTML('<div style="min-height: 80px;"></div>')
             self.restart_button.click(self.reset_components, [], [self.chatbot, self.msg, self.errorHTML, self.outHTML])
             self.restart_button.click(self.reset_conversation, [])
             self.msg.submit(respond, [self.msg, self.chatbot], [self.msg, self.chatbot, self.outHTML, self.errorHTML, self.video_folder, self.restart_button])

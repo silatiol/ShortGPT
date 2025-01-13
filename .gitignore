@@ -26,3 +26,5 @@ setup
 test.ipynb
 .venv/
 MANIFEST.in
+schema.json
+video.mp4

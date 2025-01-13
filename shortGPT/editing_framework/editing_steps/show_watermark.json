@@ -7,16 +7,13 @@
 		"z": 3,
 		"parameters": {
 			"text": null,
-			"fontsize": 80,
-			"font": "Roboto-Bold",
+			"font_size": 100,
+			"font": "fonts/LuckiestGuy-Regular.ttf",
 			"color": "white",
 			"stroke_width": 1,
 			"stroke_color": "black",
 			"method": "caption",
-			"size": [
-				650,
-				400
-			]
+			"size":[900, 450]
 		},
 		"actions": [
 			{

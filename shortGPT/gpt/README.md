@@ -34,7 +34,7 @@ This function loads a YAML file containing chat and system prompts and returns t
 
 This function opens and reads a file and returns its contents as a string. It takes the file path as input and uses the `open()` function to read the file.
 
-### `gpt3Turbo_completion(chat_prompt="", system="You are an AI that can give the answer to anything", temp=0.7, model="gpt-3.5-turbo", max_tokens=1000, remove_nl=True, conversation=None)`
+### `llm_completion(chat_prompt="", system="You are an AI that can give the answer to anything", temp=0.7, model="gpt-3.5-turbo", max_tokens=1000, remove_nl=True, conversation=None)`
 
 This function performs a GPT-3 completion using the OpenAI API. It takes various parameters such as chat prompt, system prompt, temperature, model, and maximum tokens. It returns the generated text as a response from the GPT-3 model.
 

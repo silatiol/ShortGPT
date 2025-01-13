@@ -6,7 +6,7 @@ from shortGPT.config.api_db import ApiKeyManager
 def search_videos(query_string, orientation_landscape=True):
     url = "https://api.pexels.com/videos/search"
     headers = {
-        "Authorization": ApiKeyManager.get_api_key("PEXELS")
+        "Authorization": ApiKeyManager.get_api_key("PEXELS_API_KEY")
     }
     params = {
         "query": query_string,

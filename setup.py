@@ -23,9 +23,8 @@ setup(
     packages=find_packages(),
     package_data={'': ['*.yaml', '*.json']},    # This will include all yaml files in package
     install_requires=[
-        'ffmpeg', 
         'python-dotenv', 
-        'openai', 
+        "openai==1.37.2", 
         'tiktoken',
         'tinydb',
         'tinymongo',
@@ -34,10 +33,9 @@ setup(
         'torch',
         'whisper-timestamped',
         'torchaudio',
-        'pillow==9.0.0',
-        'protobuf==3.20.0',
+        'pillow==10.4.0',
         'edge-tts',
-        'moviepy==1.0.3',
+        'moviepy==2.1.2',
         'progress',
         'questionary',
     ],

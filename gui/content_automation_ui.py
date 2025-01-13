@@ -1,3 +1,4 @@
+import time
 import gradio as gr
 
 from gui.ui_tab_short_automation import ShortAutomationUI
@@ -19,6 +20,10 @@ class GradioContentAutomationUI:
             video_automation_ui = VideoAutomationUI(self.shortGPTUI).create_ui()
             short_automation_ui = ShortAutomationUI(self.shortGPTUI).create_ui()
             video_translation_ui = VideoTranslationUI(self.shortGPTUI).create_ui()
-            choice.change(lambda x: (gr.update(visible=x == choice.choices[1]), gr.update(visible=x == choice.choices[0]), gr.update(
-                visible=x == choice.choices[2])), [choice], [video_automation_ui, short_automation_ui, video_translation_ui])
+            def onChange(x):
+                showShorts= x == choice.choices[0][0]
+                showVideo = x == choice.choices[1][0]
+                showTranslation= x == choice.choices[2][0]
+                return gr.update(visible=showShorts), gr.update(visible=showVideo), gr.update(visible=showTranslation)
+            choice.change(onChange, [choice], [short_automation_ui,video_automation_ui, video_translation_ui])
         return self.content_automation_ui

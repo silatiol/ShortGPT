@@ -6,7 +6,7 @@ def generateScript(script_description, language):
     chat = chat.replace("<<DESCRIPTION>>", script_description).replace("<<LANGUAGE>>", language)
     while not ('script' in out and out['script']):
         try:
-            result = gpt_utils.gpt3Turbo_completion(chat_prompt=chat, system=system, temp=1)
+            result = gpt_utils.llm_completion(chat_prompt=chat, system=system, temp=1)
             out = json.loads(result)
         except Exception as e:
             print(e, "Difficulty parsing the output in gpt_chat_video.generateScript")
@@ -19,7 +19,7 @@ def correctScript(script, correction):
 
     while not ('script' in out and out['script']):
         try:
-            result = gpt_utils.gpt3Turbo_completion(chat_prompt=chat, system=system, temp=1)
+            result = gpt_utils.llm_completion(chat_prompt=chat, system=system, temp=1)
             out = json.loads(result)
         except Exception as e:
             print("Difficulty parsing the output in gpt_chat_video.generateScript")

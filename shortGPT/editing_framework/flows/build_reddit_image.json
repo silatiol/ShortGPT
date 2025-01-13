@@ -20,10 +20,9 @@
 			"z": 1,
 			"parameters": {
 				"text": null,
-                "fontsize": 32,
-                "font" : "Roboto",
-                "color": "rgb(129, 131, 132)",
-                "kerning": -0.7
+                "font_size": 32,
+                "font" : "fonts/Roboto-Bold.ttf",
+                "color": "rgb(129, 131, 132)"
 			},
 			"actions": [
 				{
@@ -40,10 +39,9 @@
 			"z": 1,
 			"parameters": {
 				"text": null,
-                "fontsize": 34,
-                "font" : "Roboto-Bold",
-                "color": "rgb(129, 131, 132)",
-                "kerning": -0.7
+                "font_size": 34,
+                "font" : "fonts/Roboto-Bold.ttf",
+                "color": "rgb(129, 131, 132)"
 			},
 			"actions": [
 				{
@@ -60,10 +58,9 @@
 			"z": 1,
 			"parameters": {
 				"text": null,
-                "fontsize": 36,
-                "font" : "Roboto-Bold",
-                "color": "rgb(26, 26 , 27)",
-                "kerning": -0.7
+                "font_size": 36,
+                "font" : "fonts/Roboto-Bold.ttf",
+                "color": "rgb(26, 26 , 27)"
 			},
 			"actions": [
 				{
@@ -80,13 +77,11 @@
 			"z": 1,
 			"parameters": {
 				"text": null,
-                "fontsize": 40,
-                "font" : "Roboto-Bold",
+                "font_size": 40,
+                "font" : "fonts/Roboto-Bold.ttf",
                 "color": "rgb(26, 26, 27)",
-				"size": [850, null],
-				"method": "caption",
-				"align": "West",
-                "kerning": -1.7
+				"method": "label",
+				"text_align": "left"
 	 		},
 			"actions": [
 				{

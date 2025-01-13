@@ -146,7 +146,9 @@ class ContentShortEngine(AbstractContentEngine):
                     videoEditor.addEditingStep(EditingStep.SHOW_IMAGE, {'url': image_url,
                                                                         'set_time_start': timing[0],
                                                                         'set_time_end': timing[1]})
-
+            print("***** SCHEMA FOR RENDERING ****")
+            print(videoEditor.dumpEditingSchema())
+            print("***** SCHEMA FOR RENDERING ****")
             videoEditor.renderVideo(outputPath, logger= self.logger if self.logger is not self.default_logger else None)
 
         self._db_video_path = outputPath

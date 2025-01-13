@@ -17,7 +17,7 @@
 			{
 				"type": "resize",
 				"param": {
-					"newsize": 0.4
+					"new_size": 0.4
 				}
 			},
 			{
@@ -28,8 +28,8 @@
 						255,
 						20
 					],
-					"thr": 100,
-					"s": 5
+					"threshold": 100,
+					"stiffness": 5
 				}
 			},
 			{

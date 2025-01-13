@@ -8,16 +8,13 @@
 		},
 		"parameters": {
 			"text": null,
-			"fontsize": 100,
-			"font": "Roboto-Bold",
+			"font_size": 100,
+			"font": "fonts/LuckiestGuy-Regular.ttf",
 			"color": "white",
 			"stroke_width": 3,
 			"stroke_color": "black",
 			"method": "caption",
-			"size": [
-				900,
-				null
-			]
+			"size":[900, 450]
 		},
 		"actions": [
 			{

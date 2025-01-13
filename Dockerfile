@@ -1,15 +1,6 @@
 # Use an official Python runtime as the parent image
-FROM python:3.11-bullseye
-RUN apt-get update && apt-get install -y \
-    ffmpeg \
-    imagemagick \
-    ghostscript \
-    fonts-roboto \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-# Update font cache
-RUN fc-cache -f -v
-
-RUN sed -i '/<policy domain="path" rights="none" pattern="@\*"/d' /etc/ImageMagick-6/policy.xml
+FROM python:3.10-slim-bullseye
+RUN apt-get update && apt-get install -y ffmpeg
 # Clean up APT when done
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -35,4 +26,4 @@ EXPOSE 31415
 RUN ["printenv"]
 
 # Run Python script when the container launches
-CMD ["python", "./runShortGPT.py"]
+CMD ["python", "-u", "./runShortGPT.py"]

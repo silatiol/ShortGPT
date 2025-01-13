@@ -334,7 +334,7 @@ class AssetDatabase:
             asset['remote_url'] = base64.b64decode(asset['remote_url']).decode('utf-8')
             expire_timestamp_match = re.search(r"expire=(\d+)", asset['remote_url'])
             not_expired = expire_timestamp_match and int(expire_timestamp_match.group(1)) > time.time() + 1800
-            if not_expired and 'duration' in asset:
+            if not_expired and asset.get('duration') is not None :
                 return asset['remote_url']
         remote_url, _ = cls._update_youtube_asset_duration(key)
         return remote_url

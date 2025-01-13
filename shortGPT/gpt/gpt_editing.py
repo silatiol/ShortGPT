@@ -1,40 +1,98 @@
 from shortGPT.gpt import gpt_utils
 import json
-def getImageQueryPairs(captions,n=15 ,maxTime=2):
+def extractJsonFromString(text):
+    start = text.find('{') 
+    end = text.rfind('}') + 1
+    if start == -1 or end == 0:
+        raise Exception("Error: No JSON object found in response")
+    json_str = text[start:end]
+    return json.loads(json_str)
+
+
+def getImageQueryPairs(captions, n=15, maxTime=2):
     chat, _ = gpt_utils.load_local_yaml_prompt('prompt_templates/editing_generate_images.yaml')
     prompt = chat.replace('<<CAPTIONS TIMED>>', f"{captions}").replace("<<NUMBER>>", f"{n}")
-    res = gpt_utils.gpt3Turbo_completion(chat_prompt=prompt)
-    imagesCouples = ('{'+res).replace('{','').replace('}','').replace('\n', '').split(',')
-    pairs = []
-    t0 = 0
-    end_audio = captions[-1][0][1]
-    for a in imagesCouples:
-        try:
-            query = a[a.find("'")+1:a.rfind("'")]
-            time = float(a.split(":")[0].replace(' ',''))
-            if (time > t0 and time< end_audio):
-                pairs.append((time, query+" image"))
-                t0 = time
-        except:
-            print('problem extracting image queries from ', a)
-    for i in range(len(pairs)):
-        if(i!= len(pairs)-1):
-            end = pairs[i][0]+ maxTime if (pairs[i+1][0] - pairs[i][0]) > maxTime else pairs[i+1][0]
-        else:
-            end = pairs[i][0]+ maxTime if (end_audio - pairs[i][0]) > maxTime else end_audio
-        pairs[i] = ((pairs[i][0], end), pairs[i][1])
-    return pairs
-
+    
+    try:
+        # Get response and parse JSON
+        res = gpt_utils.llm_completion(chat_prompt=prompt)
+        data = extractJsonFromString(res)
+        # Convert to pairs with time ranges
+        pairs = []
+        end_audio = captions[-1][0][1]
+        
+        for i, item in enumerate(data["image_queries"]):
+            time = item["timestamp"]
+            query = item["query"]
+            
+            # Skip invalid timestamps
+            if time <= 0 or time >= end_audio:
+                continue
+                
+            # Calculate end time for this image
+            if i < len(data["image_queries"]) - 1:
+                next_time = data["image_queries"][i + 1]["timestamp"]
+                end = min(time + maxTime, next_time)
+            else:
+                end = min(time + maxTime, end_audio)
+                
+            pairs.append(((time, end), query + " image"))
+            
+        return pairs
+        
+    except json.JSONDecodeError:
+        print("Error: Invalid JSON response from LLM")
+        return []
+    except KeyError:
+        print("Error: Malformed JSON structure")
+        return []
+    except Exception as e:
+        print(f"Error processing image queries: {str(e)}")
+        return []
 
 def getVideoSearchQueriesTimed(captions_timed):
-    end = captions_timed[-1][0][1]
-    chat, system = gpt_utils.load_local_yaml_prompt('prompt_templates/editing_generate_videos.yaml')
-    chat = chat.replace("<<TIMED_CAPTIONS>>", f"{captions_timed}")
-    out = [[[0,0],""]]
-    while out[-1][0][1] != end:
+    """
+    Generate timed video search queries based on caption timings.
+    Returns list of [time_range, search_queries] pairs.
+    """
+    err = ""
+
+    for _ in range(4):
         try:
-            out = json.loads(gpt_utils.gpt3Turbo_completion(chat_prompt=chat, system=system, temp=1).replace("'", '"'))
+            # Get total video duration from last caption
+            end_time = captions_timed[-1][0][1]
+            
+            # Load and prepare prompt
+            chat, system = gpt_utils.load_local_yaml_prompt('prompt_templates/editing_generate_videos.yaml')
+            prompt = chat.replace("<<TIMED_CAPTIONS>>", f"{captions_timed}")
+            
+            # Get response and parse JSON
+            res = gpt_utils.llm_completion(chat_prompt=prompt, system=system)
+            data = extractJsonFromString(res)
+            
+            # Convert to expected format
+            formatted_queries = []
+            for segment in data["video_segments"]:
+                time_range = segment["time_range"]
+                queries = segment["queries"]
+                
+                # Validate time range
+                if not (0 <= time_range[0] < time_range[1] <= end_time):
+                    continue
+                    
+                # Ensure exactly 3 queries
+                while len(queries) < 3:
+                    queries.append(queries[-1])
+                queries = queries[:3]
+                
+                formatted_queries.append([time_range, queries])
+                
+            # Verify coverage
+            if not formatted_queries:
+                raise ValueError("Generated segments don't cover full video duration")
+                
+            return formatted_queries
         except Exception as e:
-            print(e)
-            print("not the right format")
-    return out
+            err = str(e)
+            print(f"Error generating video search queries {err}")
+    raise Exception(f"Failed to generate video search queries {err}")

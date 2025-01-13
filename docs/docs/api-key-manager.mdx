@@ -43,10 +43,10 @@ In the above example, we are retrieving the API keys for OPENAI and ELEVEN_LABS.
 The `key` argument in both methods can either be a string or an instance of the `ApiProvider` enum. If it is an instance of `ApiProvider`, the `value` attribute of the enum instance will be used as the key.
 
 ```python
-ApiKeyManager.set_api_key("OPENAI", "your_openai_key")
-ApiKeyManager.set_api_key("ELEVEN LABS", "your_eleven_labs_key")
+ApiKeyManager.set_api_key("OPENAI_API_KEY", "your_openai_key")
+ApiKeyManager.set_api_key("ELEVENLABS_API_KEY", "your_eleven_labs_key")
 
-openai_key = ApiKeyManager.get_api_key("OPENAI")
-eleven_labs_key = ApiKeyManager.get_api_key("ELEVEN LABS")
+openai_key = ApiKeyManager.get_api_key("OPENAI_API_KEY")
+eleven_labs_key = ApiKeyManager.get_api_key("ELEVENLABS_API_KEY")
 ```
 In the above example, we are setting and retrieving the API keys using string keys instead of `ApiProvider` instances.

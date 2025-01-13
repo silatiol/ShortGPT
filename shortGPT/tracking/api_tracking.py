@@ -38,8 +38,8 @@ class APITracker:
     
 
     def wrap_turbo(self):
-        func_name = "gpt3Turbo_completion"
-        module = __import__("gpt_utils", fromlist=["gpt3Turbo_completion"])
+        func_name = "llm_completion"
+        module = __import__("gpt_utils", fromlist=["llm_completion"])
         func = getattr(module, func_name)
         wrapped_func = self.openAIWrapper(func)
         setattr(module, func_name, wrapped_func)

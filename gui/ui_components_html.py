@@ -10,8 +10,8 @@ class GradioComponentsHTML:
                 <a href="https://discord.gg/bWreuAyRaj" target="_blank" style="text-decoration: none;">
                 <button style="margin-right: 10px; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #7289DA; border: none; border-radius: 5px; cursor: pointer;">Join Discord</button>
                 </a>
-                <a href="https://shortx.ai/?ref=sgpt" target="_blank" style="text-decoration: none;">
-                <button style="padding: 10px 20px; font-size: 16px; color: #fff; background-color: #333; border: none; border-radius: 5px; cursor: pointer;">Join ShortX, the next upgrade of ShortGPT ⭐</button>
+                <a href="https://github.com/RayVentura/ShortGPT" target="_blank" style="text-decoration: none;">
+                <button style="padding: 10px 20px; font-size: 16px; color: #fff; background-color: #333; border: none; border-radius: 5px; cursor: pointer;">Like the concept? Add a Star on Github 👉 ⭐</button>
                 </a>
             </div>
             </div>
@@ -20,10 +20,10 @@ class GradioComponentsHTML:
     @staticmethod
     def get_html_error_template() -> str:
         return '''
-        <div style='text-align: center; background: #f2dede; color: #a94442; padding: 20px; border-radius: 5px; margin: 10px;'>
-          <h2 style='margin: 0;'>ERROR : {error_message}</h2>
-          <p style='margin: 10px 0;'>Traceback Info : {stack_trace}</p>
-          <p style='margin: 10px 0;'>If the problem persists, don't hesitate to contact our support. We're here to assist you.</p>
+        <div style='text-align: center; background: #ff7f7f; color: #a94442; padding: 20px; border-radius: 5px; margin: 10px;'>
+          <h2 style='margin: 0; color: black'>ERROR : {error_message}</h2>
+          <p style='margin: 10px 0; color: black'>Traceback Info : {stack_trace}</p>
+          <p style='margin: 10px 0; color: black'>If the problem persists, don't hesitate to contact our support. We're here to assist you.</p>
           <a href='https://discord.gg/qn2WJaRH' target='_blank' style='background: #a94442; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; text-decoration: none;'>Get Help on Discord</a>
         </div>
         '''

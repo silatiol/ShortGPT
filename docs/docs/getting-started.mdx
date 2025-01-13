@@ -33,7 +33,7 @@ USE_ELEVEN_LABS = False
 # Configure the ElevenLabs Voice Module
 if USE_ELEVEN_LABS:
     eleven_labs_key = ApiKeyManager.get_api_key(ApiProvider.ELEVEN_LABS)
-    voice_module = ElevenLabsVoiceModule(api_key = eleven_labs_key, voiceName="Antoni")
+    voice_module = ElevenLabsVoiceModule(api_key = eleven_labs_key, voiceName="Chris")
 else:
     ## You can also use the EdgeTTS for Free voice synthesis
     voice_name = EDGE_TTS_VOICENAME_MAPPING[Language.GERMAN]['male']

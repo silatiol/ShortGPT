@@ -15,7 +15,7 @@ Speeds up the audio to make it under 60 seconds. If the duration of the audio is
 ### ChunkForAudio(alltext, chunk_size=2500)
 Splits a text into chunks of a specified size (default is 2500 characters) to be used for audio generation. Returns a list of text chunks.
 
-### audioToText(filename, model_size="tiny")
+### audioToText(filename, model_size="base")
 Converts an audio file to text using a pre-trained model. Returns a generator object that yields the transcribed text and its corresponding timestamps.
 
 ### getWordsPerSec(filename)

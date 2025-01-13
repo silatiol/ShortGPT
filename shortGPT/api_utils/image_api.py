@@ -3,6 +3,8 @@ import requests
 import re
 import urllib.parse
 
+from urllib3 import Retry
+
 def _extractBingImages(html):
     pattern = r'mediaurl=(.*?)&amp;.*?expw=(\d+).*?exph=(\d+)'
     matches = re.findall(pattern, html)
@@ -30,19 +32,46 @@ def _extractGoogleImages(html):
               pass
   return images
 
+import urllib.parse
+from requests.adapters import HTTPAdapter
 
 def getBingImages(query, retries=5):
     query = query.replace(" ", "+")
     images = []
     tries = 0
+    
+    # Create a session with custom retry strategy
+    session = requests.Session()
+    retry_strategy = Retry(
+        total=retries,
+        backoff_factor=1,
+        status_forcelist=[500, 502, 503, 504]
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    session.mount("https://", adapter)
+    
     while(len(images) == 0 and tries < retries):
-        response = requests.get(f"https://www.bing.com/images/search?q={query}&first=1")
-        if(response.status_code == 200):
-            images = _extractBingImages(response.text)
-        else:
-            print("Error While making bing image searches", response.text)
-            raise Exception("Error While making bing image searches")
+        try:
+            # Use verify=False to bypass SSL verification (use with caution)
+            response = session.get(
+                f"https://www.bing.com/images/search?q={query}&first=1",
+                verify=False,
+                headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                }
+            )
+            if(response.status_code == 200):
+                images = _extractBingImages(response.text)
+            else:
+                print("Error While making bing image searches", response.text)
+                raise Exception("Error While making bing image searches")
+        except requests.exceptions.SSLError as e:
+            print(f"SSL Error occurred (attempt {tries + 1}/{retries}): {str(e)}")
+            tries += 1
+            if tries >= retries:
+                raise Exception("Max retries reached - SSL Error while making Bing image searches")
+            continue
+        
     if(images):
         return images
     raise Exception("Error While making bing image searches")
-

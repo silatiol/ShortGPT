@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 
 import yt_dlp
 
@@ -10,6 +11,7 @@ CONST_CHARS_PER_SEC = 20.5  # Arrived to this result after whispering a ton of s
 WHISPER_MODEL = None
 
 
+
 def downloadYoutubeAudio(url, outputFile):
     ydl_opts = {
         "quiet": True,
@@ -17,34 +19,40 @@ def downloadYoutubeAudio(url, outputFile):
         "no_color": True,
         "no_call_home": True,
         "no_check_certificate": True,
-        "format": "bestaudio/best",
+        "format": "bestaudio/best", 
         "outtmpl": outputFile
     }
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            dictMeta = ydl.extract_info(
-                url,
-                download=True)
-            if (not os.path.exists(outputFile)):
-                raise Exception("Audio Download Failed")
-            return outputFile, dictMeta['duration']
-    except Exception as e:
-        print("Failed downloading audio from the following video/url", e.args[0])
+
+    attempts = 0
+    max_attempts = 4
+    while attempts < max_attempts:
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                dictMeta = ydl.extract_info(
+                    url,
+                    download=True)
+                if (not os.path.exists(outputFile)):
+                    raise Exception("Audio Download Failed")
+                return outputFile, dictMeta['duration']
+        except Exception as e:
+            attempts += 1
+            if attempts == max_attempts:
+                raise Exception(f"Failed downloading audio from the following video/url for url {url}", e.args[0])
+            time.sleep(1)
+            continue
     return None
 
-
-def speedUpAudio(tempAudioPath, outputFile, expected_duration=None):  # Speeding up the audio to make it under 60secs, otherwise the output video is not considered as a short.
+def speedUpAudio(tempAudioPath, outputFile, expected_duration=None):
     tempAudioPath, duration = get_asset_duration(tempAudioPath, False)
     if not expected_duration:
         if (duration > 57):
-            subprocess.run(['ffmpeg', '-i', tempAudioPath, '-af', f'atempo={(duration/57):.5f}', outputFile])
+            subprocess.run(['ffmpeg', '-loglevel', 'error', '-i', tempAudioPath, '-af', f'atempo={(duration/57):.5f}', outputFile])
         else:
-            subprocess.run(['ffmpeg', '-i', tempAudioPath, outputFile])
+            subprocess.run(['ffmpeg', '-loglevel', 'error', '-i', tempAudioPath, outputFile])
     else:
-        subprocess.run(['ffmpeg', '-i', tempAudioPath, '-af', f'atempo={(duration/expected_duration):.5f}', outputFile])
+        subprocess.run(['ffmpeg', '-loglevel', 'error', '-i', tempAudioPath, '-af', f'atempo={(duration/expected_duration):.5f}', outputFile])
     if (os.path.exists(outputFile)):
         return outputFile
-
 
 def ChunkForAudio(alltext, chunk_size=2500):
     alltext_list = alltext.split('.')

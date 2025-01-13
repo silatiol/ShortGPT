@@ -14,25 +14,27 @@ def generateRedditPostMetadata(title):
 
 def getInterestingRedditQuestion():
     chat, system = gpt_utils.load_local_yaml_prompt('prompt_templates/reddit_generate_question.yaml')
-    return gpt_utils.gpt3Turbo_completion(chat_prompt=chat, system=system, temp=1.08)
+    return gpt_utils.llm_completion(chat_prompt=chat, system=system, temp=1.08)
 
 def createRedditScript(question):
     chat, system = gpt_utils.load_local_yaml_prompt('prompt_templates/reddit_generate_script.yaml')
     chat = chat.replace("<<QUESTION>>", question)
-    result = "Reddit, " + question +" "+gpt_utils.gpt3Turbo_completion(chat_prompt=chat, system=system, temp=1.08)
+    result = "Reddit, " + question +" "+gpt_utils.llm_completion(chat_prompt=chat, system=system, temp=1.08)
     return result
     
 
 def getRealisticness(text):
     chat, system = gpt_utils.load_local_yaml_prompt('prompt_templates/reddit_filter_realistic.yaml')
     chat = chat.replace("<<INPUT>>", text)
-    while True:
+    attempts = 0
+    while attempts <= 4:
+        attempts+=1
         try:
-            result = gpt_utils.gpt3Turbo_completion(chat_prompt=chat, system=system, temp=1)
+            result = gpt_utils.llm_completion(chat_prompt=chat, system=system, temp=1)
             return json.loads(result)['score']
         except Exception as e:
             print("Error in getRealisticness", e.args[0])
-
+    raise Exception("LLM Failed to generate a realisticness score on the script")
 
 def getQuestionFromThread(text):
     if ((text.find("Reddit, ") < 15) and (10 < text.find("?") < 100)):
@@ -40,13 +42,13 @@ def getQuestionFromThread(text):
     else:
         chat, system = gpt_utils.load_local_yaml_prompt('prompt_templates/reddit_filter_realistic.yaml')
         chat = chat.replace("<<STORY>>", text)
-        question = gpt_utils.gpt3Turbo_completion(chat_prompt=chat, system=system).replace("\n", "")
+        question = gpt_utils.llm_completion(chat_prompt=chat, system=system).replace("\n", "")
         question = question.replace('"', '').replace("?", "")
     return question
 
 
 def generateUsername():
     chat, system = gpt_utils.load_local_yaml_prompt('prompt_templates/reddit_username.yaml')
-    return gpt_utils.gpt3Turbo_completion(chat_prompt=chat, system=system, temp=1.2).replace("u/", "")
+    return gpt_utils.llm_completion(chat_prompt=chat, system=system, temp=1.2).replace("u/", "")
 
 

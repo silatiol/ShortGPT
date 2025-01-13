@@ -18,7 +18,7 @@ class ShortGptUI(AbstractBaseUI):
 
     def create_interface(self):
         '''Create Gradio interface'''
-        with gr.Blocks(css="footer {visibility: hidden}", title="ShortGPT Demo") as shortGptUI:
+        with gr.Blocks(theme=gr.themes.Default(spacing_size=gr.themes.sizes.spacing_sm), css="footer {visibility: hidden}", title="ShortGPT Demo") as shortGptUI:
             with gr.Row(variant='compact'):
                 gr.HTML(GradioComponentsHTML.get_html_header())
 
@@ -30,9 +30,25 @@ class ShortGptUI(AbstractBaseUI):
     def launch(self):
         '''Launch the server'''
         shortGptUI = self.create_interface()
-        shortGptUI.queue(concurrency_count=5, max_size=20).launch(server_port=31415, height=1000, share=self.colab, server_name="0.0.0.0")
+        if not getattr(self, 'colab', False):
+                    print("\n\n********************* STARTING SHORGPT **********************")
+                    print("\nShortGPT is running here 👉 http://localhost:31415\n")
+                    print("********************* STARTING SHORGPT **********************\n\n")
+        shortGptUI.queue().launch(server_port=31415, height=1000, allowed_paths=["public/","videos/","fonts/"], share=self.colab, server_name="0.0.0.0")
+
 
 
 if __name__ == "__main__":
     app = ShortGptUI()
     app.launch()
+
+
+import signal
+
+def signal_handler(sig, frame):
+    print("Closing Gradio server...")
+    import gradio as gr
+    gr.close_all()
+    exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)

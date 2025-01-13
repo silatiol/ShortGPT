@@ -30,9 +30,9 @@ class AssetLibrary(AbstractComponentUI):
                     with gr.Column(visible=False) as localFileFlow:
                         local_upload_name = gr.Textbox(label="Name (required)")
                         upload_type = gr.Radio([AssetType.BACKGROUND_VIDEO.value, AssetType.BACKGROUND_MUSIC.value, AssetType.IMAGE.value], value="background video", interactive=True, label="Type")
-                        video_upload = gr.Video(visible=True, source="upload", type="filepath", interactive=True)
-                        audio_upload = gr.Audio(visible=False, source="upload", type="filepath", interactive=True)
-                        image_upload = gr.Image(visible=False, source="upload", type="filepath", interactive=True)
+                        video_upload = gr.Video(visible=True, sources="upload", interactive=True)
+                        audio_upload = gr.Audio(visible=False, sources="upload", type="filepath", interactive=True)
+                        image_upload = gr.Image(visible=False, sources="upload", type="filepath", interactive=True)
                         upload_button = gr.Button("ADD")
                         upload_type.change(lambda x: (gr.update(visible='video' in x),
                                                       gr.update(visible=any(type in x for type in ['audio', 'music'])),
@@ -92,11 +92,11 @@ class AssetLibrary(AbstractComponentUI):
         '''Add a youtube asset'''
         AssetDatabase.add_remote_asset(asset_name, AssetType(type), yt_url)
         latest_df = AssetDatabase.get_df()
-        return gr.DataFrame.update(value=latest_df), gr.HTML.update(value=self.__get_asset_embed(latest_df, 0)),\
+        return gr.DataFrame.update(value=latest_df), gr.update(value=self.__get_asset_embed(latest_df, 0)),\
             gr.update(value=f"🗑️ Delete {latest_df.iloc[0]['name']}"),\
-            gr.Accordion.update(open=False),\
-            gr.CheckboxGroup.update(choices=AssetComponentsUtils.getBackgroundVideoChoices(), interactive=True),\
-            gr.CheckboxGroup.update(choices=AssetComponentsUtils.getBackgroundMusicChoices(), interactive=True)
+            gr.update(open=False),\
+            gr.update(choices=AssetComponentsUtils.getBackgroundVideoChoices(), interactive=True),\
+            gr.update(choices=AssetComponentsUtils.getBackgroundMusicChoices(), interactive=True)
 
     def __get_first_preview(self):
         '''Get the first preview'''
@@ -109,20 +109,20 @@ class AssetLibrary(AbstractComponentUI):
         data = AssetDatabase.get_df()
         if len(data) > 0:
             return gr.update(value=data),\
-                gr.HTML.update(value=self.__get_asset_embed(data, 0)),\
+                gr.update(value=self.__get_asset_embed(data, 0)),\
                 gr.update(value=f"🗑️ Delete {data.iloc[0]['name']}"),\
-                gr.CheckboxGroup.update(choices=AssetComponentsUtils.getBackgroundVideoChoices(), interactive=True),\
-                gr.CheckboxGroup.update(choices=AssetComponentsUtils.getBackgroundMusicChoices(), interactive=True)
+                gr.update(choices=AssetComponentsUtils.getBackgroundVideoChoices(), interactive=True),\
+                gr.update(choices=AssetComponentsUtils.getBackgroundMusicChoices(), interactive=True)
         return gr.Dataframe.update(value=data),\
-            gr.HTML.update(visible=True),\
-            gr.Button.update(value="🗑️ Delete"),\
-            gr.CheckboxGroup.update(choices=AssetComponentsUtils.getBackgroundVideoChoices(), interactive=True),\
-            gr.CheckboxGroup.update(choices=AssetComponentsUtils.getBackgroundMusicChoices(), interactive=True)
+            gr.update(visible=True),\
+            gr.update(value="🗑️ Delete"),\
+            gr.update(choices=AssetComponentsUtils.getBackgroundVideoChoices(), interactive=True),\
+            gr.update(choices=AssetComponentsUtils.getBackgroundMusicChoices(), interactive=True)
 
     def __preview_asset(self, data, evt: gr.SelectData):
         '''Preview the asset with the given name'''
         html_embed = self.__get_asset_embed(data, evt.index[0])
-        return gr.HTML.update(value=html_embed), gr.update(value=f"🗑️ Delete {data.iloc[evt.index[0]]['name']}")
+        return gr.update(value=html_embed), gr.update(value=f"🗑️ Delete {data.iloc[evt.index[0]]['name']}")
 
     def __get_asset_embed(self, data, row):
         '''Get the embed html for the asset at the given row'''
@@ -143,7 +143,7 @@ class AssetLibrary(AbstractComponentUI):
             asset_link = f"https://youtube.com/embed/{asset_link_split}"
             embed_html = f'<iframe width="{embed_width}" height="{embed_height}" src="{asset_link}"></iframe>'
         elif 'public/' in asset_link:
-            asset_link = f"http://localhost:31415/file={asset_link}"
+            asset_link = f"http://localhost:31415/gradio_api/file={asset_link}"
             file_ext = asset_link.split('.')[-1]
 
             if file_ext in ['mp3', 'wav', 'ogg']:
@@ -190,8 +190,8 @@ class AssetLibrary(AbstractComponentUI):
         shutil.move(path_dict[upload_type], new_path)
         AssetDatabase.add_local_asset(upload_name, AssetType(upload_type), new_path)
         latest_df = AssetDatabase.get_df()
-        return gr.DataFrame.update(value=latest_df), gr.HTML.update(value=self.__get_asset_embed(latest_df, 0)),\
+        return gr.DataFrame.update(value=latest_df), gr.update(value=self.__get_asset_embed(latest_df, 0)),\
             gr.update(value=f"🗑️ Delete {latest_df.iloc[0]['name']}"),\
-            gr.Accordion.update(open=False),\
-            gr.CheckboxGroup.update(choices=AssetComponentsUtils.getBackgroundVideoChoices(), interactive=True),\
-            gr.CheckboxGroup.update(choices=AssetComponentsUtils.getBackgroundMusicChoices(), interactive=True)
+            gr.update(open=False),\
+            gr.update(choices=AssetComponentsUtils.getBackgroundVideoChoices(), interactive=True),\
+            gr.update(choices=AssetComponentsUtils.getBackgroundMusicChoices(), interactive=True)

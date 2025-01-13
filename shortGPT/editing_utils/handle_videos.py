@@ -1,4 +1,3 @@
-import ffmpeg
 import os
 import random
 import yt_dlp
@@ -6,24 +5,16 @@ import subprocess
 import json
 
 def getYoutubeVideoLink(url):
-    if 'shorts' in url:
-        ydl_opts = {
-            "quiet": True,
-            "no_warnings": True,
-            "no_color": True,
-            "no_call_home": True,
-            "no_check_certificate": True,
-            "format": "bestvideo[height<=1920]"
-        }
-    else:
-        ydl_opts = {
+    format_filter = "[height<=1920]" if 'shorts' in url else "[height<=1080]"
+    ydl_opts = {
         "quiet": True,
         "no_warnings": True,
         "no_color": True,
         "no_call_home": True,
         "no_check_certificate": True,
-        "format": "bestvideo[height<=1080]"
-        }
+        # Look for m3u8 formats first, then fall back to regular formats
+        "format": f"bestvideo[ext=m3u8]{format_filter}/bestvideo{format_filter}"
+    }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             dictMeta = ydl.extract_info(
@@ -31,11 +22,9 @@ def getYoutubeVideoLink(url):
                 download=False)
             return dictMeta['url'], dictMeta['duration']
     except Exception as e:
-        print("Failed getting video link from the following video/url", e.args[0])
-    return None, None
+        raise Exception(f"Failed getting video link from the following video/url {url} {e.args[0]}")
 
-def extract_random_clip_from_video(video_url, video_duration, clip_duration , output_file):
-    print(video_url, video_duration, clip_duration , output_file)
+def extract_random_clip_from_video(video_url, video_duration, clip_duration, output_file):
     """Extracts a clip from a video using a signed URL.
     Args:
         video_url (str): The signed URL of the video.
@@ -50,12 +39,19 @@ def extract_random_clip_from_video(video_url, video_duration, clip_duration , ou
         raise Exception("Video too short")
     start_time = video_duration*0.15 + random.random()* (0.7*video_duration-clip_duration)
     
-    (
-        ffmpeg
-        .input(video_url, ss=start_time, t=clip_duration)
-        .output(output_file, codec="libx264", preset="ultrafast")
-        .run()
-    )
+    command = [
+        'ffmpeg',
+        '-loglevel', 'error',
+        '-ss', str(start_time),
+        '-t', str(clip_duration),
+        '-i', video_url,
+        '-c:v', 'libx264',
+        '-preset', 'ultrafast',
+        output_file
+    ]
+    
+    subprocess.run(command, check=True)
+    
     if not os.path.exists(output_file):
         raise Exception("Random clip failed to be written")
     return output_file

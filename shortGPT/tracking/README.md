@@ -27,7 +27,7 @@ This class is responsible for tracking the usage of APIs and saving the data to 
 - Returns the result of the API call.
 
 #### Method: `wrap_turbo()`
-- Wraps the `gpt3Turbo_completion` function from the `gpt_utils` module using the `openAIWrapper` method.
+- Wraps the `llm_completion` function from the `gpt_utils` module using the `openAIWrapper` method.
 - Replaces the original function with the wrapped function.
 
 #### Method: `wrap_eleven()`
