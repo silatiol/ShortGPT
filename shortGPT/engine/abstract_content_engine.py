@@ -18,7 +18,7 @@ class AbstractContentEngine(ABC):
         else:
             self.dataManager = CONTENT_DB.createContentDataManager(content_type)
         self.id = str(self.dataManager._getId())
-        self.initializeMagickAndFFMPEG()
+        self.initializeFFMPEG()
         self.prepareEditingPaths()
         self._db_language = language.value
         self.voiceModule = voiceModule
@@ -83,13 +83,10 @@ class AbstractContentEngine(ABC):
     def set_logger(self, logger):
         self.logger = logger
 
-    def initializeMagickAndFFMPEG(self):
+    def initializeFFMPEG(self):
         ffmpeg_path = get_program_path("ffmpeg")
         if not ffmpeg_path:
             raise Exception("FFmpeg, a program used for automated editing within ShortGPT was not found on your computer. Please go back to the README and follow the instructions to install FFMPEG")
         ffprobe_path = get_program_path("ffprobe")
         if not ffprobe_path:
             raise Exception("FFProbe, a dependecy of FFmpeg was not found. Please go back to the README and follow the instructions to install FFMPEG")
-        convert_path = get_program_path("convert")
-        if not convert_path:
-            raise Exception("ImageMagick, a program required for making Captions with ShortGPT was not found on your computer. Please go back to the README and follow the instructions to install ImageMagick")

@@ -15,12 +15,6 @@ def get_program_path(program_name):
     program_path = search_program(program_name)
     return program_path
 
-magick_path = get_program_path("magick")
-if magick_path:
-    os.environ['IMAGEMAGICK_BINARY'] = magick_path
-
-import os
-
 def is_running_in_colab():
     return 'COLAB_GPU' in os.environ
 

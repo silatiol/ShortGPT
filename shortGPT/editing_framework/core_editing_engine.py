@@ -36,7 +36,7 @@ class CoreEditingEngine:
         image.save_frame(output_file)
         return output_file
 
-    def generate_video(self, schema:Dict[str, Any], output_file, logger=None, force_duration=None) -> None:
+    def generate_video(self, schema:Dict[str, Any], output_file, logger=None, force_duration=None, threads=None) -> None:
         visual_assets = dict(sorted(schema['visual_assets'].items(), key=lambda item: item[1]['z']))
         audio_assets = dict(sorted(schema['audio_assets'].items(), key=lambda item: item[1]['z']))
         
@@ -80,9 +80,9 @@ class CoreEditingEngine:
             video = video.with_duration(force_duration)
         if logger:
             my_logger = MoviepyProgressLogger(callBackFunction=logger)
-            video.write_videofile(output_file, codec='libx264', audio_codec='aac', fps=25, preset='veryfast', logger=my_logger)
+            video.write_videofile(output_file, threads=threads,codec='libx264', audio_codec='aac', fps=25, preset='veryfast', logger=my_logger)
         else:
-            video.write_videofile(output_file, codec='libx264', audio_codec='aac', fps=25, preset='veryfast')
+            video.write_videofile(output_file, threads=threads,codec='libx264', audio_codec='aac', fps=25, preset='veryfast')
         return output_file
     
     def generate_audio(self, schema:Dict[str, Any], output_file, logger=None) -> None:

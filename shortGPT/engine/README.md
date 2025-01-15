@@ -46,7 +46,7 @@ This file contains the `AbstractContentEngine` class, which is an abstract base 
 
 - `set_logger(self, logger)`: Sets the logger function for logging the progress of the short video rendering.
 
-- `initializeMagickAndFFMPEG(self)`: Initializes the paths for FFmpeg, FFProbe, and ImageMagick. If any of these programs are not found, it raises an exception.
+- `initializeFFMPEG(self)`: Initializes the paths for FFmpeg, FFProbe. If any of these programs are not found, it raises an exception.
 
 ---
 

@@ -200,5 +200,3 @@ Parameters:
 
 Returns:
 - The path of the program, or None if the program is not found.
-
-Note: The `magick_path` variable sets the `IMAGEMAGICK_BINARY` environment variable to the path of the `magick` program if it exists.
