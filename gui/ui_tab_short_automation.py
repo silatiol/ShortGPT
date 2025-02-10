@@ -144,8 +144,9 @@ class ShortAutomationUI(AbstractComponentUI):
                 raise gr.Error("Watermark should be at least 3 characters long.")
 
         openai_key = ApiKeyManager.get_api_key("OPENAI_API_KEY")
-        if not openai_key:
-            raise gr.Error("OPENAI API key is missing. Please go to the config tab and enter the API key.")
+        gemini_key = ApiKeyManager.get_api_key("GEMINI_API_KEY")
+        if not openai_key and not gemini_key:
+            raise gr.Error("GEMINI OR OPENAI API key is missing. Please go to the config tab and enter the API key.")
         eleven_labs_key = ApiKeyManager.get_api_key("ELEVENLABS_API_KEY")
         if self.tts_engine == AssetComponentsUtils.ELEVEN_TTS and not eleven_labs_key:
             raise gr.Error("ELEVENLABS_API_KEY API key is missing. Please go to the config tab and enter the API key.")

@@ -31,7 +31,7 @@ class ConfigUI(AbstractComponentUI):
                 raise gr.Error(e.args[0])
         return remaining_chars
 
-    def save_keys(self, openai_key, eleven_key, pexels_key):
+    def save_keys(self, openai_key, eleven_key, pexels_key, gemini_key):
         '''Save the keys in the database'''
         if (self.api_key_manager.get_api_key("OPENAI_API_KEY") != openai_key):
             self.api_key_manager.set_api_key("OPENAI_API_KEY", openai_key)
@@ -43,12 +43,16 @@ class ConfigUI(AbstractComponentUI):
             return gr.update(value=openai_key),\
                 gr.update(value=eleven_key),\
                 gr.update(value=pexels_key),\
+                gr.update(value=gemini_key),\
                 gr.update(choices=new_eleven_voices),\
                 gr.update(choices=new_eleven_voices)
+        if (self.api_key_manager.get_api_key("GEMINI_API_KEY") != gemini_key):
+            self.api_key_manager.set_api_key("GEMINI_API_KEY", gemini_key)
 
         return gr.update(value=openai_key),\
             gr.update(value=eleven_key),\
             gr.update(value=pexels_key),\
+            gr.update(value=gemini_key),\
             gr.update(visible=True),\
             gr.update(visible=True)
 
@@ -84,9 +88,14 @@ class ConfigUI(AbstractComponentUI):
                         pexels_textbox = gr.Textbox(value=self.api_key_manager.get_api_key("PEXELS_API_KEY"), label=f"PEXELS KEY", show_label=True, interactive=True, show_copy_button=True, type="password", scale=40)
                         show_pexels_key = gr.Button("Show", size="sm", scale=1)
                         show_pexels_key.click(self.on_show, [show_pexels_key], [pexels_textbox, show_pexels_key])
+                    with gr.Row():
+                        gemini_textbox = gr.Textbox(value=self.api_key_manager.get_api_key("GEMINI_API_KEY"), label=f"GEMINI API KEY", show_label=True, interactive=True, show_copy_button=True, type="password", scale=40)
+                        show_gemini_key = gr.Button("Show", size="sm", scale=1)
+                        show_gemini_key.click(self.on_show, [show_gemini_key], [gemini_textbox, show_gemini_key])
+
                     save_button = gr.Button("save", size="sm", scale=1)
                     save_button.click(self.verify_eleven_key, [eleven_labs_textbox, eleven_characters_remaining], [eleven_characters_remaining]).success(
-                        self.save_keys, [openai_textbox, eleven_labs_textbox, pexels_textbox], [openai_textbox, eleven_labs_textbox, pexels_textbox, AssetComponentsUtils.voiceChoice(), AssetComponentsUtils.voiceChoiceTranslation()])
+                        self.save_keys, [openai_textbox, eleven_labs_textbox, pexels_textbox, gemini_textbox], [openai_textbox, eleven_labs_textbox, pexels_textbox, gemini_textbox, AssetComponentsUtils.voiceChoice(), AssetComponentsUtils.voiceChoiceTranslation()])
                     save_button.click(lambda _: gr.update(value="Keys Saved !"), [], [save_button])
                     save_button.click(self.back_to_normal, [], [save_button])
         return config_ui
