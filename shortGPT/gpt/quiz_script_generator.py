@@ -17,6 +17,7 @@ class QuizScriptGenerator:
         num_questions: int = 3,
         style: str = "engaging",
         target_duration: float = 30.0,
+        language: str = "English",
     ) -> Dict[str, str]:
         """
         Generate three DISTINCT quiz scripts for a topic in a single LLM call:
@@ -146,7 +147,8 @@ Now output the three scripts separated by the exact markers: <<<EASY>>>, <<<MEDI
                            num_questions: int = 3,
                            difficulty: str = "medium",
                            style: str = "engaging",
-                           target_duration: float = 30.0) -> str:
+                           target_duration: float = 30.0,
+                           language: str = "English") -> str:
         """
         Generate a compelling quiz script for the given topic.
         
@@ -165,11 +167,11 @@ Now output the three scripts separated by the exact markers: <<<EASY>>>, <<<MEDI
         timing = QuizScriptGenerator._calculate_timing(num_questions, target_duration)
         
         # Create the system prompt for optimal quiz generation
-        system_prompt = QuizScriptGenerator._create_system_prompt(timing, style, difficulty)
+        system_prompt = QuizScriptGenerator._create_system_prompt(timing, style, difficulty, language)
         
         # Create the user prompt with topic and requirements
         user_prompt = QuizScriptGenerator._create_user_prompt(
-            topic, num_questions, difficulty, style, timing
+            topic, num_questions, difficulty, style, timing, language
         )
         
         try:
@@ -202,7 +204,7 @@ Now output the three scripts separated by the exact markers: <<<EASY>>>, <<<MEDI
         """Calculate optimal timing for quiz components"""
         
         # Reserve time for intro and final CTA
-        intro_duration = 5.0
+        intro_duration = 0.0
         final_cta_duration = 8.0
         available_time = target_duration - intro_duration - final_cta_duration
         
@@ -225,27 +227,28 @@ Now output the three scripts separated by the exact markers: <<<EASY>>>, <<<MEDI
         }
     
     @staticmethod
-    def _create_system_prompt(timing: Dict[str, float], style: str, difficulty: str) -> str:
+    def _create_system_prompt(timing: Dict[str, float], style: str, difficulty: str, language: str) -> str:
         """Create the system prompt for LLM"""
-        return f"""You are an expert quiz content creator specializing in viral social media videos. Your task is to create compelling, {style} quiz scripts that grab attention and keep viewers engaged.
+        return f"""You are an expert quiz content creator specializing in viral social media videos. Your task is to create compelling, {style} quiz scripts in {language} that grab attention and keep viewers engaged.
 
 CRITICAL REQUIREMENTS:
 1. Use EXACT timing format: [start_time-end_time] COMPONENT_TYPE: content
 2. Follow the precise structure and timing provided
 3. ALL questions and answers MUST be 100% factually accurate and verifiable from authoritative sources
 4. ONLY use well-established, universally accepted facts - avoid controversial or disputed information
-5. Double and triple check every fact, date, number, and claim before including it
-6. For numerical answers, use exact figures from verified sources
-7. ALL questions must be 15 words or less
-8. ALL answers must be 15 words or less
-9. ALL CTA content must be 15 words or less
-10. Make questions {difficulty} difficulty level
-11. Use {style} tone throughout
-12. Include engaging hooks, surprising facts, and compelling answers, but be concise.
-13. Keep content concise but impactful
-14. The length of the text should match the timing allowed, since a human will be reading it. Use short sentences or increase timings.
-15. Prefer questions about concrete, objective facts rather than subjective or interpretive topics
-16. Include sources in your internal verification but do not include them in the output
+5. Double and triple check every fact, date, number, and claim before including it.
+6. Use the language provided.
+7. For numerical answers, use exact figures from verified sources
+8. ALL questions must be 15 words or less
+9. ALL answers must be 15 words or less
+10. ALL CTA content must be 15 words or less
+11. Make questions {difficulty} difficulty level
+12. Use {style} tone throughout
+13. Include engaging hooks, surprising facts, and compelling answers, but be concise.
+14. Keep content concise but impactful
+15. The length of the text should match the timing allowed, since a human will be reading it. Use short sentences or increase timings.
+16. Prefer questions about concrete, objective facts rather than subjective or interpretive topics
+17. Include sources in your internal verification but do not include them in the output
 
 
 FACT VERIFICATION REQUIREMENTS:
@@ -273,7 +276,7 @@ Return ONLY the formatted script with precise timestamps. No explanations or add
 
     @staticmethod
     def _create_user_prompt(topic: str, num_questions: int, difficulty: str, 
-                          style: str, timing: Dict[str, float]) -> str:
+                          style: str, timing: Dict[str, float], language: str) -> str:
         """Create the user prompt with specific requirements"""
         
         # Calculate cumulative timing
@@ -319,6 +322,7 @@ Return ONLY the formatted script with precise timestamps. No explanations or add
         return f"""Create a compelling {style} quiz script about: {topic}
 
 REQUIREMENTS:
+- Use the {language} language.
 - {num_questions} questions, {difficulty} difficulty
 - Topic: {topic}
 - Style: {style} and engaging

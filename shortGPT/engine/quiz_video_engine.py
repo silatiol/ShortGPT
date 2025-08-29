@@ -154,7 +154,8 @@ class QuizVideoEngine(ContentVideoEngine):
                 num_questions=num_questions,
                 difficulty=difficulty,
                 style=style,
-                target_duration=target_duration
+                target_duration=target_duration,
+                language=language
             )
             
             print(f"✅ Quiz script generated successfully!")

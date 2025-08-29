@@ -192,7 +192,7 @@ class QuizAutomationUI(AbstractComponentUI):
                     return "❌ Please enter a quiz topic", "", None, None, None, None
                     
                 # Setup voice module (validate TTS config early)
-                _setup_voice(tts_choice, lang_eleven, voice_eleven, lang_edge)
+                voice_module, language = _setup_voice(tts_choice, lang_eleven, voice_eleven, lang_edge)
 
                 # Generate 3 scripts in a single prompt to avoid duplicates
                 scripts = QuizScriptGenerator.generate_multi_difficulty_scripts(
@@ -200,6 +200,7 @@ class QuizAutomationUI(AbstractComponentUI):
                     num_questions=int(num_q),
                     style=style,
                     target_duration=float(duration),
+                    language=language
                 )
 
                 # Populate preview boxes and open the accordion
@@ -318,7 +319,7 @@ class QuizAutomationUI(AbstractComponentUI):
                 quiz_topic, target_duration, tts_engine,
                 language_eleven, voice_eleven, language_edge, num_questions, quiz_style,
             ],
-            outputs=[quiz_progress, quiz_output, scripts_preview, easy_script, medium_script, hard_script]
+            outputs=[quiz_progress, quiz_output, scripts_preview, easy_script, medium_script, hard_script]  
         )
 
         proceedBtn.click(
