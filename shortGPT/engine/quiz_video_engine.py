@@ -1302,7 +1302,7 @@ class QuizVideoEngine(ContentVideoEngine):
                 
                 # Create equal weights for all inputs to prevent volume division
                 weights = ' '.join(['1.0'] * input_index)
-                filter_complex += f';{amix_inputs}amix=inputs={input_index}:duration=longest:weights={weights}:normalize=0[out]'
+                filter_complex += f';{amix_inputs}amix=inputs={input_index}:duration=longest:normalize=0[out]'
                 
                 ffmpeg_cmd.extend(['-filter_complex', filter_complex, '-map', '[out]', composite_audio_path])
                 
