@@ -30,6 +30,11 @@ class EditingStep(Enum):
     INSERT_AUDIO = "insert_audio.json"
     EXTRACT_AUDIO = "extract_audio.json"
     ADD_BACKGROUND_VOICEOVER = "add_background_voiceover.json"
+    ADD_QUIZ_QUESTION = "add_quiz_question.json"
+    ADD_COUNTDOWN_OVERLAY = "add_countdown_overlay.json"
+    ADD_QUIZ_ANSWER = "add_quiz_answer.json"
+    ADD_QUIZ_CTA = "add_quiz_cta.json"
+    ADD_INTRO_ANIMATION = "add_intro_animation.json"
 
 class Flow(Enum):
     WHITE_REDDIT_IMAGE_FLOW = "build_reddit_image.json"

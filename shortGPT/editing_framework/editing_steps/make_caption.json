@@ -9,12 +9,13 @@
 		"parameters": {
 			"text": null,
 			"font_size": 100,
-			"font": "fonts/LuckiestGuy-Regular.ttf",
+			"font": "fonts/BebasNeue-Regular.ttf",
 			"color": "white",
+			"highlight_color": "#FFD700",
 			"stroke_width": 3,
 			"stroke_color": "black",
 			"method": "caption",
-			"size":[900, 450]
+			"size":[900, 900]
 		},
 		"actions": [
 			{

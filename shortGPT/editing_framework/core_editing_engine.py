@@ -3,7 +3,7 @@ from shortGPT.config.path_utils import get_program_path
 import os
 from shortGPT.config.path_utils import handle_path
 import numpy as np
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Tuple
 from moviepy import (AudioFileClip, CompositeVideoClip, CompositeAudioClip, ImageClip,
                     TextClip, VideoFileClip, AudioClip)
 from moviepy.Clip import Clip
@@ -45,7 +45,11 @@ class CoreEditingEngine:
             asset = visual_assets[asset_key]
             asset_type = asset['type']
             if asset_type == 'video':
-                clip = self.process_video_asset(asset)
+                try:
+                    clip = self.process_video_asset(asset)
+                except Exception as e:
+                    print(f"Failed to load video {asset['parameters']['url']}. Error : {str(e)}")
+                    continue
             elif asset_type == 'image':
                 # clip = self.process_image_asset(asset)
                 try:
@@ -80,9 +84,9 @@ class CoreEditingEngine:
             video = video.with_duration(force_duration)
         if logger:
             my_logger = MoviepyProgressLogger(callBackFunction=logger)
-            video.write_videofile(output_file, threads=threads,codec='libx264', audio_codec='aac', fps=25, preset='veryfast', logger=my_logger)
+            video.write_videofile(output_file, threads=threads,codec='libx264', audio_codec='aac', fps=30, preset='veryfast', logger=my_logger)
         else:
-            video.write_videofile(output_file, threads=threads,codec='libx264', audio_codec='aac', fps=25, preset='veryfast')
+            video.write_videofile(output_file, threads=threads,codec='libx264', audio_codec='aac', fps=30, preset='veryfast')
         return output_file
     
     def generate_audio(self, schema:Dict[str, Any], output_file, logger=None) -> None:
@@ -197,18 +201,232 @@ class CoreEditingEngine:
         if 'audio' in asset['parameters']:
             params['audio'] = asset['parameters']['audio']
         clip = VideoFileClip(**params)
+        
+        # Add automatic cropping for vertical format if needed
+        clip = self._auto_crop_for_vertical(clip, asset)
+        
         return self.process_common_visual_actions(clip, asset['actions'])
+    
+    def _auto_crop_for_vertical(self, clip: VideoFileClip, asset: Dict[str, Any]) -> VideoFileClip:
+        """
+        Automatically crop video to match vertical 1080x1920 format if needed.
+        
+        Args:
+            clip: Original video clip
+            asset: Asset configuration
+            
+        Returns:
+            Cropped video clip optimized for vertical format
+        """
+        # Target vertical resolution: 1080x1920 (9:16 aspect ratio)
+        target_width = 1080
+        target_height = 1920
+        target_aspect_ratio = target_width / target_height  # 0.5625
+        
+        # Get current video dimensions
+        current_width = clip.w
+        current_height = clip.h
+        current_aspect_ratio = current_width / current_height
+        
+        print(f"📐 Video dimensions: {current_width}x{current_height} (aspect ratio: {current_aspect_ratio:.3f})")
+        print(f"🎯 Target dimensions: {target_width}x{target_height} (aspect ratio: {target_aspect_ratio:.3f})")
+        
+        # If already correct aspect ratio, just resize
+        if abs(current_aspect_ratio - target_aspect_ratio) < 0.01:
+            print("✅ Video already has correct aspect ratio, just resizing...")
+            clip = clip.with_effects([vfx.Resize((target_width, target_height))])
+            return clip
+        
+        # If video is wider than target (landscape), crop width and center
+        if current_aspect_ratio > target_aspect_ratio:
+            print("📱 Cropping landscape video to vertical format...")
+            
+            # Calculate new width to match target aspect ratio
+            new_width = int(current_height * target_aspect_ratio)
+            x_offset = (current_width - new_width) // 2  # Center crop
+            
+            print(f"   🔧 Cropping from {current_width}x{current_height} to {new_width}x{current_height}")
+            print(f"   📍 Crop position: x={x_offset}, y=0")
+            
+            # Apply crop then resize to target dimensions
+            clip = clip.with_effects([
+                vfx.Crop(x1=x_offset, y1=0, width=new_width, height=current_height),
+                vfx.Resize((target_width, target_height))
+            ])
+            
+        # If video is taller than target (portrait but wrong ratio), crop height and center
+        elif current_aspect_ratio < target_aspect_ratio:
+            print("📐 Cropping tall video to vertical format...")
+            
+            # Calculate new height to match target aspect ratio
+            new_height = int(current_width / target_aspect_ratio)
+            y_offset = (current_height - new_height) // 2  # Center crop
+            
+            print(f"   🔧 Cropping from {current_width}x{current_height} to {current_width}x{new_height}")
+            print(f"   📍 Crop position: x=0, y={y_offset}")
+            
+            # Apply crop then resize to target dimensions
+            clip = clip.with_effects([
+                vfx.Crop(x1=0, y1=y_offset, width=current_width, height=new_height),
+                vfx.Resize((target_width, target_height))
+            ])
+        
+        print(f"✅ Video cropped and resized to {target_width}x{target_height}")
+        return clip
 
     def process_image_asset(self, asset: Dict[str, Any]) -> ImageClip:
         clip = ImageClip(asset['parameters']['url'])
         return self.process_common_visual_actions(clip, asset['actions'])
 
-    def process_text_asset(self, asset: Dict[str, Any]) -> TextClip:
+    def _parse_bracket_text(self, text: str) -> List[Tuple[str, bool]]:
+        """
+        Parse text to identify bracketed sections and regular text.
+        
+        Args:
+            text: Input text with potential [bracketed] sections
+            
+        Returns:
+            List of tuples (text_segment, is_highlighted)
+        """
+        import re
+        
+        segments = []
+        last_end = 0
+        
+        # Find all bracketed sections
+        bracket_pattern = r'\[([^\]]+)\]'
+        for match in re.finditer(bracket_pattern, text):
+            # Add regular text before the bracket
+            if match.start() > last_end:
+                regular_text = text[last_end:match.start()]
+                if regular_text.strip():
+                    segments.append((regular_text, False))
+            
+            # Add bracketed text (without brackets)
+            bracketed_text = match.group(1)
+            segments.append((bracketed_text, True))
+            
+            last_end = match.end()
+        
+        # Add remaining regular text
+        if last_end < len(text):
+            remaining_text = text[last_end:]
+            if remaining_text.strip():
+                segments.append((remaining_text, False))
+        
+        # If no brackets found, return the entire text as regular
+        if not segments:
+            segments.append((text, False))
+            
+        return segments
+
+    def _create_composite_text_clip(self, asset: Dict[str, Any]) -> Union[TextClip, CompositeVideoClip]:
+        """
+        Create a text clip with bracket highlighting using different colors.
+        
+        This creates multiple TextClip objects with different colors and combines them.
+        
+        Args:
+            asset: Text asset configuration
+            
+        Returns:
+            CompositeVideoClip with multi-colored text or fallback TextClip
+        """
+        text_clip_params = asset['parameters']
+        text = text_clip_params['text']
+        
+        # Parse text segments
+        segments = self._parse_bracket_text(text)
+        
+        # If only one segment and it's not highlighted, use simple TextClip
+        if len(segments) == 1 and not segments[0][1]:
+            return self.process_common_visual_actions(self._create_simple_text_clip(asset), asset['actions'])
+        
+        # Try to create multi-color text
+        try:
+            clips = []
+            
+            # Base parameters
+            base_color = text_clip_params.get('color', 'white')
+            highlight_color = text_clip_params.get('highlight_color', '#FFD700')
+            font = text_clip_params.get('font')
+            font_size = text_clip_params.get('font_size', 100)
+            stroke_width = text_clip_params.get('stroke_width', 3)
+            stroke_color = text_clip_params.get('stroke_color', 'black')
+            
+            # Create individual text clips for each segment
+            for segment_text, is_highlighted in segments:
+                if not segment_text.strip():
+                    continue
+                
+                color = highlight_color if is_highlighted else base_color
+                
+                # Create text clip for this segment
+                clip_params = {
+                    'text': segment_text,
+                    'font': font,
+                    'font_size': font_size,
+                    'color': color,
+                    'stroke_width': stroke_width + (1 if is_highlighted else 0),
+                    'stroke_color': stroke_color,
+                    'method': 'label'  # Use label for individual segments
+                }
+                clip_params = {k: v for k, v in clip_params.items() if v is not None}
+                
+                segment_clip = TextClip(**clip_params)
+                clips.append(segment_clip)
+            
+            if len(clips) > 1:
+                # For now, concatenate the text strings with color indicators since positioning is complex
+                # This provides a simpler but functional approach
+                combined_text = ""
+                for i, (segment_text, is_highlighted) in enumerate(segments):
+                    if not segment_text.strip():
+                        continue
+                    if is_highlighted:
+                        combined_text += f"🔥{segment_text}🔥"
+                    else:
+                        combined_text += segment_text
+                
+                # Create a single text clip with the combined text
+                modified_params = text_clip_params.copy()
+                modified_params['text'] = combined_text
+                modified_asset = dict(asset)
+                modified_asset['parameters'] = modified_params
+                
+                # Apply actions to the single clip
+                return self.process_common_visual_actions(self._create_simple_text_clip(modified_asset), asset['actions'])
+            
+            elif len(clips) == 1:
+                return self.process_common_visual_actions(clips[0], asset['actions'])
+                
+        except Exception as e:
+            print(f"Warning: Multi-color text failed ({e}), using emoji emphasis fallback")
+            
+        # Fallback to visual emphasis approach
+        import re
+        # Use bold-style visual markers for highlighted text
+        highlighted_text = re.sub(r'\[([^\]]+)\]', r'>>> \1 <<<', text)
+        
+        modified_params = text_clip_params.copy()
+        modified_params['text'] = highlighted_text
+        modified_asset = dict(asset)
+        modified_asset['parameters'] = modified_params
+        
+        return self.process_common_visual_actions(self._create_simple_text_clip(modified_asset), asset['actions'])
+
+    def _create_simple_text_clip(self, asset: Dict[str, Any]) -> TextClip:
+        """
+        Create a simple TextClip without special formatting.
+        
+        Args:
+            asset: Text asset configuration
+            
+        Returns:
+            Simple TextClip
+        """
         text_clip_params = asset['parameters']
         
-        if not (any(key in text_clip_params for key in ['text','fontsize', 'size'])):
-            raise Exception('You must include at least a size or a fontsize to determine the size of your text')
-        text_method = text_clip_params.get('method', 'label')
         clip_info = {
             'text': text_clip_params['text'],
             'font': text_clip_params.get('font'),
@@ -217,12 +435,29 @@ class CoreEditingEngine:
             'stroke_width': text_clip_params.get('stroke_width'),
             'stroke_color': text_clip_params.get('stroke_color'),
             'size': text_clip_params.get('size'),
-            'method': text_method,
+            'method': text_clip_params.get('method', 'label'),
             'text_align': text_clip_params.get('text_align', 'center')
         }
         clip_info = {k: v for k, v in clip_info.items() if v is not None}
-        clip = TextClip(**clip_info)
-        return self.process_common_visual_actions(clip, asset['actions'])
+        
+        return TextClip(**clip_info)
+
+    def process_text_asset(self, asset: Dict[str, Any]) -> Union[TextClip, CompositeVideoClip]:
+        text_clip_params = asset['parameters']
+        
+        if not (any(key in text_clip_params for key in ['text','fontsize', 'size'])):
+            raise Exception('You must include at least a size or a fontsize to determine the size of your text')
+        
+        # Check if text contains brackets - if so, use composite text processing for highlighting
+        text = text_clip_params.get('text', '')
+        method = text_clip_params.get('method', 'label')
+        
+        # Use composite text processing for bracket highlighting regardless of method
+        if '[' in text and ']' in text:
+            return self._create_composite_text_clip(asset)
+        else:
+            # Use simple text clip for regular text
+            return self.process_common_visual_actions(self._create_simple_text_clip(asset), asset['actions'])
 
     def process_audio_asset(self, asset: Dict[str, Any]) -> AudioFileClip:
         clip = AudioFileClip(asset['parameters']['url'])

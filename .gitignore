@@ -29,3 +29,6 @@ MANIFEST.in
 schema.json
 video.mp4
 Untitled-1.ipynb
+videos/*
+bin/*
+lib/*

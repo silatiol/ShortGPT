@@ -92,7 +92,7 @@ class AssetLibrary(AbstractComponentUI):
         '''Add a youtube asset'''
         AssetDatabase.add_remote_asset(asset_name, AssetType(type), yt_url)
         latest_df = AssetDatabase.get_df()
-        return gr.DataFrame.update(value=latest_df), gr.update(value=self.__get_asset_embed(latest_df, 0)),\
+        return gr.update(value=latest_df), gr.update(value=self.__get_asset_embed(latest_df, 0)),\
             gr.update(value=f"🗑️ Delete {latest_df.iloc[0]['name']}"),\
             gr.update(open=False),\
             gr.update(choices=AssetComponentsUtils.getBackgroundVideoChoices(), interactive=True),\
@@ -113,7 +113,7 @@ class AssetLibrary(AbstractComponentUI):
                 gr.update(value=f"🗑️ Delete {data.iloc[0]['name']}"),\
                 gr.update(choices=AssetComponentsUtils.getBackgroundVideoChoices(), interactive=True),\
                 gr.update(choices=AssetComponentsUtils.getBackgroundMusicChoices(), interactive=True)
-        return gr.Dataframe.update(value=data),\
+        return gr.update(value=data),\
             gr.update(visible=True),\
             gr.update(value="🗑️ Delete"),\
             gr.update(choices=AssetComponentsUtils.getBackgroundVideoChoices(), interactive=True),\
@@ -190,7 +190,7 @@ class AssetLibrary(AbstractComponentUI):
         shutil.move(path_dict[upload_type], new_path)
         AssetDatabase.add_local_asset(upload_name, AssetType(upload_type), new_path)
         latest_df = AssetDatabase.get_df()
-        return gr.DataFrame.update(value=latest_df), gr.update(value=self.__get_asset_embed(latest_df, 0)),\
+        return gr.update(value=latest_df), gr.update(value=self.__get_asset_embed(latest_df, 0)),\
             gr.update(value=f"🗑️ Delete {latest_df.iloc[0]['name']}"),\
             gr.update(open=False),\
             gr.update(choices=AssetComponentsUtils.getBackgroundVideoChoices(), interactive=True),\

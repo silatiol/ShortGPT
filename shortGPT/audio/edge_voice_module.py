@@ -41,7 +41,7 @@ class EdgeTTSVoiceModule(VoiceModule):
 
     async def async_generate_voice(self, text, outputfile):
         try:
-            communicate = edge_tts.Communicate(text, self.voiceName)
+            communicate = edge_tts.Communicate(text, self.voiceName, rate='+0%', volume='+0%', pitch='+5Hz')
             with open(outputfile, "wb") as file:
                 async for chunk in communicate.stream():
                     if chunk["type"] == "audio":

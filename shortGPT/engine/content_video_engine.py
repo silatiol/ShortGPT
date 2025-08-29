@@ -52,6 +52,8 @@ class ContentVideoEngine(AbstractContentEngine):
         if (self._db_language != Language.ENGLISH.value):
             self._db_translated_script = gpt_translate.translateContent(script, self._db_language)
             script = self._db_translated_script
+
+        print(f"Generating voice for script: {script}")
         self._db_temp_audio_path = self.voiceModule.generate_voice(
             script, self.dynamicAssetDir + "temp_audio_path.wav")
 
@@ -60,8 +62,8 @@ class ContentVideoEngine(AbstractContentEngine):
             return
         self.verifyParameters(tempAudioPath=self._db_temp_audio_path)
         # Since the video is not supposed to be a short( less than 60sec), there is no reason to speed it up
-        self._db_audio_path = self._db_temp_audio_path
-        return
+        # self._db_audio_path = self._db_temp_audio_path
+        # return  
         self._db_audio_path = audio_utils.speedUpAudio(
             self._db_temp_audio_path, self.dynamicAssetDir+"audio_voice.wav")
 
@@ -78,6 +80,7 @@ class ContentVideoEngine(AbstractContentEngine):
         self.verifyParameters(captionsTimed=self._db_timed_captions)
         # Returns a list of pairs of timing (t1,t2) + 3 search video queries, such as: [[t1,t2], [search_query_1, search_query_2, search_query_3]]
         self._db_timed_video_searches = gpt_editing.getVideoSearchQueriesTimed(self._db_timed_captions)
+        print(f"Generated video search terms: {self._db_timed_video_searches}")
 
     def _generateVideoUrls(self):
         timed_video_searches = self._db_timed_video_searches
@@ -89,6 +92,7 @@ class ContentVideoEngine(AbstractContentEngine):
             for query in reversed(search_terms):
                 url = getBestVideo(query, orientation_landscape=not self._db_format_vertical, used_vids=used_links)
                 if url:
+                    print(f"Found video: {url}")
                     used_links.append(url.split('.hd')[0])
                     break
             timed_video_urls.append([[t1, t2], url])

@@ -1,0 +1,39 @@
+{
+	"quiz_question": {
+		"type": "text",
+		"z": 5,
+		"inputs":{
+			"parameters": ["text"],
+			"actions": ["set_time_start", "set_time_end"]
+		},
+		"parameters": {
+			"text": null,
+			"font_size": 120,
+			"font": "fonts/BebasNeue-Regular.ttf",
+			"color": "#F562AC",
+			"highlight_color": "#FFD700",
+			"stroke_width": 6,
+			"stroke_color": "#1A1D21",
+			"method": "caption",
+			"size":[900, 900]
+		},
+		"actions": [
+			{
+				"type": "set_time_start",
+				"param": null
+			},
+			{
+				"type": "set_time_end",
+				"param": null
+			},
+			{
+				"type": "screen_position",
+				"param": {
+					"pos": 
+						"center"
+
+				}
+			}
+		]
+	}
+}

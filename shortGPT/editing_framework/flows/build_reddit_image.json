@@ -21,7 +21,7 @@
 			"parameters": {
 				"text": null,
                 "font_size": 32,
-                "font" : "fonts/Roboto-Bold.ttf",
+                "font" : "fonts/BebasNeue-Regular.ttf",
                 "color": "rgb(129, 131, 132)"
 			},
 			"actions": [
@@ -40,7 +40,7 @@
 			"parameters": {
 				"text": null,
                 "font_size": 34,
-                "font" : "fonts/Roboto-Bold.ttf",
+                "font" : "fonts/BebasNeue-Regular.ttf",
                 "color": "rgb(129, 131, 132)"
 			},
 			"actions": [
@@ -59,7 +59,7 @@
 			"parameters": {
 				"text": null,
                 "font_size": 36,
-                "font" : "fonts/Roboto-Bold.ttf",
+                "font" : "fonts/BebasNeue-Regular.ttf",
                 "color": "rgb(26, 26 , 27)"
 			},
 			"actions": [
@@ -78,7 +78,7 @@
 			"parameters": {
 				"text": null,
                 "font_size": 40,
-                "font" : "fonts/Roboto-Bold.ttf",
+                "font" : "fonts/BebasNeue-Regular.ttf",
                 "color": "rgb(26, 26, 27)",
 				"method": "label",
 				"text_align": "left"

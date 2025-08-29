@@ -16,7 +16,7 @@ def num_tokens_from_messages(texts, model="gpt-4o-mini"):
         encoding = tiktoken.encoding_for_model(model)
     except KeyError:
         encoding = tiktoken.get_encoding("cl100k_base")
-    if model == "gpt-4o-mini":  # note: future models may deviate from this
+    if model == "gpt-o4-mini":  # note: future models may deviate from this
         if isinstance(texts, str):
             texts = [texts]
         score = 0
@@ -69,18 +69,20 @@ def open_file(filepath):
         return infile.read()
 from openai import OpenAI
 
-def llm_completion(chat_prompt="", system="", temp=0.7, max_tokens=2000, remove_nl=True, conversation=None):
+def llm_completion(chat_prompt="", system="", temp=0.7, max_tokens=10000, remove_nl=True, conversation=None, gemini=False):
     openai_key= ApiKeyManager.get_api_key("OPENAI_API_KEY")
     gemini_key = ApiKeyManager.get_api_key("GEMINI_API_KEY")
-    if gemini_key:
+    if gemini_key and gemini:
+        print("Using Gemini API Key")
         client = OpenAI( 
             api_key=gemini_key,
             base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
         )
-        model="gemini-2.0-flash-lite-preview-02-05"
+        model="gemini-2.5-flash"
     elif openai_key:
+        print("Using OpenAI API Key")
         client = OpenAI( api_key=openai_key)
-        model="gpt-4o-mini"
+        model="gpt-4.1-mini-2025-04-14"
     else:
         raise Exception("No OpenAI or Gemini API Key found for LLM request")
     max_retry = 5
@@ -95,13 +97,17 @@ def llm_completion(chat_prompt="", system="", temp=0.7, max_tokens=2000, remove_
                     {"role": "system", "content": system},
                     {"role": "user", "content": chat_prompt}
                 ]
+
+            print(model)
+            print(messages)
             response = client.chat.completions.create(
                 model=model,
                 messages=messages,
-                max_tokens=max_tokens,
+                max_completion_tokens=max_tokens,
                 temperature=temp,
-                timeout=30
-                )
+                timeout=30,
+                **({"reasoning_effort": "medium"} if gemini else {})
+            )
             text = response.choices[0].message.content.strip()
             if remove_nl:
                 text = re.sub('\s+', ' ', text)
