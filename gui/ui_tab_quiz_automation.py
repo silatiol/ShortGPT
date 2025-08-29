@@ -200,7 +200,7 @@ class QuizAutomationUI(AbstractComponentUI):
                     num_questions=int(num_q),
                     style=style,
                     target_duration=float(duration),
-                    language=language
+                    language=language.value
                 )
 
                 # Populate preview boxes and open the accordion

@@ -31,7 +31,7 @@ class QuizScriptGenerator:
         timing = QuizScriptGenerator._calculate_timing(num_questions, target_duration)
 
         system_prompt = f"""You are an expert quiz content creator for viral short videos.
-You must produce THREE complete scripts in one response: EASY, MEDIUM, and HARD.
+You must produce THREE complete scripts in one response: EASY, MEDIUM, and HARD in {language} language.
 
 GLOBAL REQUIREMENTS (apply to all three scripts):
 1. Use EXACT timing format: [start-end] COMPONENT: content
@@ -40,13 +40,13 @@ GLOBAL REQUIREMENTS (apply to all three scripts):
 4. No question overlap or paraphrased duplicates between difficulties
 5. Style: {style}
 6. Topic: {topic}
-7. Questions/answers/CTAs must be fit the allowed timing, with reading time of around 150 words per minute. DO NOT use long sentences.
-8. Add brief explanations to the answers to make them more engaging.
-9. Use universally accepted facts, avoid current/volatile records
-10. In CTA promote the app "Witz" with a link in bio.
+7. Use the {language} language.
+8. Questions/answers/CTAs must be fit the allowed timing, with reading time of around 150 words per minute. DO NOT use long sentences.
+9. Add brief explanations to the answers to make them more engaging.
+10. Use universally accepted facts, avoid current/volatile records
+11. In CTA promote the app "Witz" with a link in bio.
 
 TIMING (reuse for each difficulty):
-- Intro: {timing['intro_duration']:.1f}s
 - Question: {timing['question_duration']:.1f}s each
 - Countdown: {timing['countdown_duration']:.1f}s (always "3-2-1")
 - Answer: {timing['answer_duration']:.1f}s each
@@ -65,10 +65,6 @@ Return ONLY the scripts in this exact marker-separated format, nothing else."""
         def build_structure_template() -> str:
             current_time = 0.0
             lines = []
-            # Intro
-            intro_end = current_time + timing['intro_duration']
-            lines.append(f"[{current_time:.1f}-{intro_end:.1f}] CTA: [Compelling intro about {topic}, mentioning that there are {num_questions} questions]")
-            current_time = intro_end
             # Questions
             for i in range(num_questions):
                 q_end = current_time + timing['question_duration']
@@ -95,7 +91,7 @@ Return ONLY the scripts in this exact marker-separated format, nothing else."""
 
         user_prompt = f"""Create THREE complete {style} quiz scripts about: {topic}
 - Each script must contain {num_questions} questions
-- Difficulties: EASY, MEDIUM, HARD (in that order)
+- Difficulties: EASY, MEDIUM, HARD (in that order) in {language} language.
 - Absolutely NO duplicate or paraphrased questions across scripts
 - All questions must have single, unambiguous correct answers
 - Add very short and brief explanations to the answers to make them more engaging.
@@ -218,7 +214,6 @@ Now output the three scripts separated by the exact markers: <<<EASY>>>, <<<MEDI
         padding = time_per_question * 0.1  # 10% padding
         
         return {
-            'intro_duration': intro_duration,
             'question_duration': max(2.0, question_duration),
             'countdown_duration': countdown_duration,
             'answer_duration': max(2.0, answer_duration + padding),
@@ -260,7 +255,6 @@ FACT VERIFICATION REQUIREMENTS:
 - Avoid: "Fastest", "biggest", "most popular" unless you can verify with current, authoritative data
 
 TIMING SPECIFICATIONS:
-- Intro duration: {timing['intro_duration']:.1f}s
 - Question duration: {timing['question_duration']:.1f}s each
 - Countdown duration: {timing['countdown_duration']:.1f}s (always "3-2-1")
 - Answer duration: {timing['answer_duration']:.1f}s each
@@ -283,9 +277,6 @@ Return ONLY the formatted script with precise timestamps. No explanations or add
         current_time = 0.0
         
         # Build example timing structure
-        example_structure = f"[{current_time:.1f}-{current_time + timing['intro_duration']:.1f}] CTA: [Compelling intro hook about {topic}, mentioning that there are {num_questions} questions]\n"
-        current_time += timing['intro_duration']
-        
         for i in range(num_questions):
             # Question
             question_start = current_time
@@ -407,11 +398,6 @@ Generate the complete script following this exact timing and format:"""
         current_time = 0.0
         
         script_lines = []
-        
-        # Intro
-        intro_end = current_time + timing['intro_duration']
-        script_lines.append(f"[{current_time:.1f}-{intro_end:.1f}] ANSWER: 🧠 Ready for an amazing {topic} challenge?")
-        current_time = intro_end
         
         # Sample question
         question_end = current_time + timing['question_duration']

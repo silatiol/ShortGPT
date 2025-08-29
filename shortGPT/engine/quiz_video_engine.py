@@ -1576,13 +1576,15 @@ class QuizVideoEngine(ContentVideoEngine):
             # Clean the content for audio
             if component_type == 'countdown':
                 audio_text = "Three. Two. One."
+                if self._db_language != Language.ENGLISH.value:
+                    audio_text = "Tre. Due. Uno."
             else:
                 audio_text = self._cleanContentForAudio(component['content'])
             
             if audio_text:
                 # Handle translation if needed
-                if self._db_language != Language.ENGLISH.value:
-                    audio_text = gpt_translate.translateContent(audio_text, self._db_language)
+                # if self._db_language != Language.ENGLISH.value:
+                #     audio_text = gpt_translate.translateContent(audio_text, self._db_language)
                 
                 # Generate unique audio filename for each component
                 audio_filename = f"{component_type}_{i}_audio.wav"
