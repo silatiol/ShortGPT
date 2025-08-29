@@ -815,7 +815,7 @@ class QuizVideoEngine(ContentVideoEngine):
                 '-reconnect', '1',
                 '-reconnect_streamed', '1',
                 '-reconnect_delay_max', '2',
-                '-http_persistent', '0',
+                '-multiple_requests', '1',
             ]
         command += [
             '-ss', str(start_time),            # Start time
@@ -915,7 +915,7 @@ class QuizVideoEngine(ContentVideoEngine):
                 'ffmpeg','-loglevel','error',
                 '-protocol_whitelist','file,http,https,tcp,tls',
                 '-reconnect','1','-reconnect_streamed','1','-reconnect_delay_max','2',
-                '-http_persistent','0',
+                '-multiple_requests','1',
                 '-i', video_url,
                 '-c:v','libx264','-preset','ultrafast','-movflags','+faststart','-pix_fmt','yuv420p','-y', local_path
             ]
@@ -1302,7 +1302,7 @@ class QuizVideoEngine(ContentVideoEngine):
                 
                 # Create equal weights for all inputs to prevent volume division
                 weights = ' '.join(['1.0'] * input_index)
-                filter_complex += f';{amix_inputs}amix=inputs={input_index}:duration=longest:normalize=0[out]'
+                filter_complex += f';{amix_inputs}amix=inputs={input_index}:duration=longest[out]'
                 
                 ffmpeg_cmd.extend(['-filter_complex', filter_complex, '-map', '[out]', composite_audio_path])
                 
