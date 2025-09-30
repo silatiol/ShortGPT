@@ -8,7 +8,7 @@ tiktoken
 tinydb
 tinymongo
 proglog
-yt-dlp>=2025.1.12
+yt-dlp
 torch
 torchaudio
 ### whisper timestamped 
