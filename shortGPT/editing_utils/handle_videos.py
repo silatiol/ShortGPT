@@ -5,15 +5,23 @@ import subprocess
 import json
 
 def getYoutubeVideoLink(url):
-    format_filter = "[height<=1920]" if 'shorts' in url else "[height<=1080]"
+    # Determine if this is a shorts video and adjust format accordingly
+    is_shorts = 'shorts' in url.lower()
+    
+    if is_shorts:
+        # For shorts, prefer vertical formats but fall back gracefully
+        format_selector = "best[height>=width]/best"
+    else:
+        # For regular videos, prefer landscape formats with reasonable resolution
+        format_selector = "best[height<=1080]/best"
+    
     ydl_opts = {
         "quiet": True,
         "no_warnings": True,
         "no_color": True,
         "no_call_home": True,
         "no_check_certificate": True,
-        # Look for m3u8 formats first, then fall back to regular formats
-        "format": f"bestvideo[ext=m3u8]{format_filter}/bestvideo{format_filter}"
+        "format": format_selector
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
