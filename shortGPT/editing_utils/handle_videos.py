@@ -10,7 +10,7 @@ def getYoutubeVideoLink(url):
     
     if is_shorts:
         # For shorts, prefer vertical formats but fall back gracefully
-        format_selector = "best[height>=width]/best"
+        format_selector = "best[height>=1920]/best"
     else:
         # For regular videos, prefer landscape formats with reasonable resolution
         format_selector = "best[height<=1080]/best"
